@@ -1,0 +1,6 @@
+{
+  "name": "mallow gallery",
+  "identifier": "io.github.pandyzhou.mallow.gallery",
+  "version": "0.1.0",
+  "out": "build"
+}

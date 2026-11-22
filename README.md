@@ -1,5 +1,7 @@
 # mallow
 
+**在线展示：<https://pandyzhou.github.io/mallow/>**（组件编译成 WebAssembly 在浏览器里运行，可以直接点、直接切换浅色和深色）
+
 [MyGo](https://github.com/egoist/mygo) 原生 UI 的**新拟态（Neumorphism / Soft UI）组件库**，纯 Go 编写，不依赖 WebView。
 
 所有元素都与所在的表面同色，光从左上方照来：凸起的元素上方是高光、下方是阴影，凹陷的元素则把这对阴影收进内侧。没有边框，大圆角，只用一种强调色。自带浅色、深色两套配色，可以跟随系统切换。
@@ -55,8 +57,12 @@ win := mygo.NewWindow(mygo.WindowOptions{
 ## 组件展示
 
 ```sh
-go run ./cmd/gallery
+go run ./cmd/gallery                            # 桌面窗口
+go tool mygo dev -web cmd/gallery               # 浏览器里运行，改代码自动刷新
+go tool mygo build -platform web cmd/gallery    # 编译成静态网站，输出到 cmd/gallery/build/web
 ```
+
+推送到 main 后，GitHub Actions 会把展示页编译成网页版，部署到 GitHub Pages。
 
 不开窗口，把展示页渲染成图片：
 

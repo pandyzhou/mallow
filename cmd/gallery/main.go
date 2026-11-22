@@ -1,11 +1,16 @@
 // Gallery shows every mallow component, in the light and the dark palette.
+// It runs as a desktop app and, compiled to WebAssembly, in a browser: the
+// GitHub Pages site of the repository.
 //
-//	go run ./cmd/gallery
+//	go run ./cmd/gallery                                  # desktop
+//	go tool mygo dev -web cmd/gallery                     # browser, live reload
+//	go tool mygo build -platform web cmd/gallery          # static site in cmd/gallery/build/web
 package main
 
 import (
 	"fmt"
 	"log"
+	"runtime"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
@@ -152,8 +157,14 @@ func (g *gallery) sections(c *ui.Context) {
 
 func main() {
 	g := newGallery()
+	web := runtime.GOOS == "js"
+	if web {
+		// In a browser the page is the window: there are no window buttons
+		// to draw, and the browser finds the fonts.
+		mallow.Font = "system-ui"
+	}
 	mygo.App.WhenReady(func() {
-		g.win = mygo.NewWindow(mygo.WindowOptions{
+		w := mygo.NewWindow(mygo.WindowOptions{
 			Title:             "mallow gallery",
 			Width:             1180,
 			Height:            820,
@@ -163,6 +174,9 @@ func main() {
 			HideWindowButtons: true,
 			Content:           ui.View(g.view),
 		})
+		if !web {
+			g.win = w
+		}
 	})
 	if err := mygo.App.Run(); err != nil {
 		log.Fatal(err)
