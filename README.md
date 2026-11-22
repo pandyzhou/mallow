@@ -13,7 +13,7 @@
 | 分类 | 组件 |
 |---|---|
 | 主题 | `Use` / `UseMode` / `Theme`，`LightPalette` / `DarkPalette`，当前配色 `Base`、`Text`、`Muted`、`Accent`… |
-| 表面 | `Raised` 凸起、`Recessed` 凹陷、`Card` 卡片、`Tray` 托盘、`Groove` 凹槽分隔线、`Soft` 过渡、`Label` 小标题 |
+| 表面 | `Raised` 凸起、`Recessed` 凹陷、`RecessedWide` 大面积凹陷、`Card` 卡片、`Tray` 托盘、`Groove` 凹槽分隔线、`Soft` 过渡、`Slide` 滑动动画、`Label` 小标题 |
 | 按钮 | `Button`、`PrimaryButton`、`IconButton`、`GhostIconButton`，以及 `Glyph*` 图形 |
 | 选择 | `Check` 勾选、`CheckDisc`、`Switch` 开关、`Segmented` 分段选择 |
 | 输入 | `TextInput` |
@@ -53,6 +53,15 @@ win := mygo.NewWindow(mygo.WindowOptions{
 })
 // 视图里：mallow.TitleBar(c, win, nil)
 ```
+
+## 性能
+
+MyGo 绘制内阴影时，要对元素的**每一个像素**做模糊计算（包括离边缘很远、看不到阴影的中间部分）；外阴影只计算边缘一圈。所以：
+
+- 按钮、输入框、勾选圆圈这类小控件用 `Recessed`（真正的内阴影）。
+- 面积大的凹陷（托盘、面板）用 `RecessedWide`：在四条边外侧放细条，让它们的外阴影照进元素内，再按圆角裁剪，看起来一样，GPU 开销只有边缘一圈。`Tray` 已经这样做了。
+
+在 2560×1600、240Hz 屏幕的核显上实测，Atelier 整窗重绘从中位 2.8 ms 降到 1.6 ms。用 `MYGO_FRAME_STATS=all` 运行程序可以看到每帧的耗时。
 
 ## 组件展示
 

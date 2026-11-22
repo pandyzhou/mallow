@@ -34,12 +34,38 @@ func Raised(e ui.Element, d Depth) ui.Element {
 		Shadow(-o, -o, 2*o, 0, Light)
 }
 
-// Recessed makes e sink into the surface.
+// Recessed makes e sink into the surface, with inner shadows. They cost the
+// GPU every pixel of e, the middle too, so keep it for controls; a large
+// well takes RecessedWide.
 func Recessed(e ui.Element, d Depth) ui.Element {
 	o := float32(d)
 	return e.Background(Base).
 		InsetShadow(o, o, 2*o, 0, Dark).
 		InsetShadow(-o, -o, 2*o, 0, Light)
+}
+
+// RecessedWide makes e, rounded by radius, sink into the surface as Recessed
+// does, for large areas. Inner shadows are evaluated over every pixel of an
+// element, so a well the size of half a window costs the GPU milliseconds a
+// frame; here strips just outside each edge cast ordinary outer shadows into
+// e, clipped to its corners, and outer shadows cost only the band where they
+// show.
+func RecessedWide(e ui.Element, d Depth, radius float32) ui.Element {
+	o := float32(d)
+	blur := 2 * o
+	// A strip thicker than the blur's reach casts as a whole half-plane would.
+	t := 3*blur + o
+	return e.Background(Base).Radius(radius).Draw(func(p *ui.Painter, r ui.Rect) {
+		p.Clip(r, radius, func() {
+			x0, y0, x1, y1 := r.X-t, r.Y-t, r.X+r.W+t, r.Y+r.H+t
+			// The shadow above and to the left, as the light comes from the
+			// top left; the highlight below and to the right.
+			p.Shadow(ui.Rect{X: x0, Y: y0, W: x1 - x0, H: t}, 0, o, o, blur, 0, Dark)
+			p.Shadow(ui.Rect{X: x0, Y: y0, W: t, H: y1 - y0}, 0, o, o, blur, 0, Dark)
+			p.Shadow(ui.Rect{X: x0, Y: r.Y + r.H, W: x1 - x0, H: t}, 0, -o, -o, blur, 0, Light)
+			p.Shadow(ui.Rect{X: r.X + r.W, Y: y0, W: t, H: y1 - y0}, 0, -o, -o, blur, 0, Light)
+		})
+	})
 }
 
 // Slide is the motion of what moves from one place to another, as a
@@ -61,7 +87,7 @@ func Card(c *ui.Context, d Depth) ui.Element {
 // Tray is a recessed column: a well that sets what it holds apart from what
 // is around it, as raised cards rising out of it.
 func Tray(c *ui.Context, d Depth) ui.Element {
-	return Recessed(ui.Column(c).Radius(RadiusCard+8), d)
+	return RecessedWide(ui.Column(c), d, RadiusCard+8)
 }
 
 // Groove is a divider pressed into the surface: a thin channel, the way soft
