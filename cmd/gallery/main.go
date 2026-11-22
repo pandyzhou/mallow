@@ -1,0 +1,170 @@
+// Gallery shows every mallow component, in the light and the dark palette.
+//
+//	go run ./cmd/gallery
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/ui"
+
+	"github.com/pandyzhou/mallow"
+)
+
+type gallery struct {
+	win mallow.Window
+
+	mode    string
+	nav     string
+	period  string
+	checks  [3]bool
+	sync    bool
+	notify  bool
+	name    string
+	note    string
+	clicks  int
+	primary int
+}
+
+func newGallery() *gallery {
+	return &gallery{
+		mode:   string(mallow.ModeSystem),
+		nav:    "组件",
+		period: "week",
+		checks: [3]bool{true, false, false},
+		sync:   true,
+	}
+}
+
+func (g *gallery) view(c *ui.Context) {
+	mallow.UseMode(c, mallow.Mode(g.mode))
+	ui.Column(c).Fill().Children(func() {
+		mallow.TitleBar(c, g.win, func() {
+			ui.Text(c, "mallow").FontSize(13).FontWeight(600).TextColor(mallow.Muted)
+		})
+		ui.Row(c).Grow(1).MinHeight(0).AlignItems(ui.Stretch).Gap(28).Padding(4, 24, 24, 24).Children(func() {
+			g.sidebar(c)
+			ui.Scroll(c).Grow(1).MinWidth(0).Padding(8, 12, 24, 12).Gap(32).Children(func() {
+				g.sections(c)
+			})
+		})
+	})
+}
+
+func (g *gallery) sidebar(c *ui.Context) {
+	mallow.Card(c, mallow.Large).Width(200).Shrink(0).Padding(28, 16).Gap(24).Children(func() {
+		ui.Column(c).PaddingX(12).Gap(4).Children(func() {
+			ui.Text(c, "mallow").FontSize(20).FontWeight(600).TextColor(mallow.Text)
+			ui.Text(c, "新拟态组件库").FontSize(12).TextColor(mallow.Muted)
+		})
+		mallow.Groove(c).MarginX(4)
+		ui.Column(c).Grow(1).Gap(12).Role(ui.RoleTabList).Label("导航").Children(func() {
+			for _, name := range []string{"组件", "表单", "设置"} {
+				if mallow.NavItem(c.Key(name), name, g.nav == name).Clicked() {
+					g.nav = name
+				}
+			}
+		})
+		ui.Column(c).Gap(10).Children(func() {
+			mallow.Label(c, "外观").PaddingX(8)
+			mallow.Segmented(c, "外观", &g.mode, []mallow.Option{
+				{Value: string(mallow.ModeLight), Label: "浅色"},
+				{Value: string(mallow.ModeDark), Label: "深色"},
+				{Value: string(mallow.ModeSystem), Label: "系统"},
+			})
+		})
+	})
+}
+
+// section is a titled raised card of examples.
+func section(c *ui.Context, title string, body func()) {
+	mallow.Card(c, mallow.Medium).Padding(24).Gap(18).Children(func() {
+		ui.Text(c, title).FontSize(16).FontWeight(600).TextColor(mallow.Text)
+		mallow.Groove(c)
+		body()
+	})
+}
+
+func (g *gallery) sections(c *ui.Context) {
+	ui.Column(c).Gap(4).Children(func() {
+		mallow.Label(c, "COMPONENTS")
+		ui.Text(c, "组件一览").FontSize(28).FontWeight(600).TextColor(mallow.Text)
+	})
+	ui.Row(c).Gap(28).AlignItems(ui.Start).Children(func() {
+		ui.Column(c).Grow(1).Basis(0).MinWidth(0).Gap(28).Children(func() {
+			section(c, "按钮 Button", func() {
+				ui.Row(c).Gap(18).Wrap().AlignItems(ui.Center).Children(func() {
+					if mallow.Button(c, "普通按钮").Clicked() {
+						g.clicks++
+					}
+					if mallow.PrimaryButton(c, "主要按钮").Clicked() {
+						g.primary++
+					}
+					mallow.IconButton(c, "上一个", mallow.GlyphChevronLeft, mallow.IconButtonStyle{Size: 36})
+					mallow.IconButton(c, "添加", mallow.GlyphPlus, mallow.IconButtonStyle{Size: 36})
+					mallow.IconButton(c, "删除", mallow.GlyphClose, mallow.IconButtonStyle{Size: 36, Danger: true})
+				})
+				ui.Text(c, fmt.Sprintf("普通按钮点了 %d 次，主要按钮点了 %d 次", g.clicks, g.primary)).
+					FontSize(12).TextColor(mallow.Muted)
+			})
+			section(c, "勾选 Check", func() {
+				for i, label := range []string{"写周报", "读书 30 分钟", "整理房间"} {
+					mallow.Check(c.Key(i), &g.checks[i], label)
+				}
+			})
+			section(c, "开关 Switch", func() {
+				mallow.Switch(c.Key("sync"), &g.sync, "自动同步")
+				mallow.Switch(c.Key("notify"), &g.notify, "到点提醒")
+			})
+		})
+		ui.Column(c).Grow(1).Basis(0).MinWidth(0).Gap(28).Children(func() {
+			section(c, "分段选择 Segmented", func() {
+				mallow.Segmented(c, "范围", &g.period, []mallow.Option{
+					{Value: "day", Label: "日"}, {Value: "week", Label: "周"}, {Value: "month", Label: "月"},
+				})
+				ui.Text(c, "当前："+g.period).FontSize(12).TextColor(mallow.Muted)
+			})
+			section(c, "输入框 TextInput", func() {
+				mallow.TextInput(c, &g.name).Placeholder("你的名字").Label("名字")
+				mallow.TextInput(c, &g.note).Placeholder("回车提交").Label("备注")
+			})
+			section(c, "表面 Surface", func() {
+				ui.Row(c).Gap(24).Children(func() {
+					for _, s := range []struct {
+						name string
+						make func(*ui.Context) ui.Element
+					}{
+						{"凸起 Raised", func(c *ui.Context) ui.Element { return mallow.Raised(ui.Box(c), mallow.Large) }},
+						{"凹陷 Recessed", func(c *ui.Context) ui.Element { return mallow.Recessed(ui.Box(c), mallow.Large) }},
+					} {
+						ui.Column(c.Key(s.name)).Grow(1).Gap(10).AlignItems(ui.Center).Children(func() {
+							s.make(c).Size(88, 88).Radius(mallow.RadiusCard)
+							ui.Text(c, s.name).FontSize(12).TextColor(mallow.Muted)
+						})
+					}
+				})
+			})
+		})
+	})
+}
+
+func main() {
+	g := newGallery()
+	mygo.App.WhenReady(func() {
+		g.win = mygo.NewWindow(mygo.WindowOptions{
+			Title:             "mallow gallery",
+			Width:             1180,
+			Height:            820,
+			MinWidth:          900,
+			MinHeight:         600,
+			TitleBarStyle:     mygo.TitleBarHidden,
+			HideWindowButtons: true,
+			Content:           ui.View(g.view),
+		})
+	})
+	if err := mygo.App.Run(); err != nil {
+		log.Fatal(err)
+	}
+}
