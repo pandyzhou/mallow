@@ -149,10 +149,10 @@ func TestSidebarFrames(t *testing.T) {
 	_, tt := newTester(t)
 	tt.Advance(time.Second)
 	click(t, tt, "设置")
-	for i, ms := range []int{0, 60, 120, 200, 320, 600} {
-		if i > 0 {
-			tt.Advance(time.Duration(ms-[]int{0, 60, 120, 200, 320, 600}[i-1]) * time.Millisecond)
-		}
+	prev := 0
+	for _, ms := range []int{0, 40, 80, 120, 160, 220, 300, 500} {
+		tt.Advance(time.Duration(ms-prev) * time.Millisecond)
+		prev = ms
 		f, err := os.Create(fmt.Sprintf("%s/frame-%03dms.png", dir, ms))
 		if err != nil {
 			t.Fatal(err)

@@ -50,7 +50,7 @@ const (
 
 // NavList is a column of entries choosing one into *selected, as macOS's
 // source lists: one recess marks the chosen entry and, when the choice
-// changes, slides over to the new one on a spring. It reports whether the
+// changes, slides over to the new one (Slide). It reports whether the
 // choice changed.
 func NavList(c *ui.Context, label string, selected *string, items []Item) bool {
 	idx := -1
@@ -68,7 +68,7 @@ func NavList(c *ui.Context, label string, selected *string, items []Item) bool {
 			mark := ui.Box(c.Key("nav-mark")).Absolute().Left(0).Right(0).Height(navItemHeight).
 				Radius(RadiusControl).PassThrough().ZIndex(-1)
 			Recessed(mark, Small)
-			y := mark.AnimateTo("y", float32(idx*(navItemHeight+navItemGap)), ui.Snappy)
+			y := mark.AnimateTo("y", float32(idx*(navItemHeight+navItemGap)), Slide)
 			mark.Top(y)
 		}
 		for i, it := range items {

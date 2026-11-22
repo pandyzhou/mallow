@@ -42,6 +42,11 @@ func Recessed(e ui.Element, d Depth) ui.Element {
 		InsetShadow(-o, -o, 2*o, 0, Light)
 }
 
+// Slide is the motion of what moves from one place to another, as a
+// NavList's recess: a quick spring, about as fast as macOS's selection,
+// settling with a hint of bounce rather than swinging back and forth.
+var Slide = ui.Animation{Spring: ui.SpringOptions{Duration: 280 * time.Millisecond, Bounce: 0.08}}
+
 // Soft fades shadow, color and position changes over 200 ms.
 func Soft(e ui.Element) ui.Element {
 	return e.Transition(ui.ElementTransition{Duration: 200 * time.Millisecond})
