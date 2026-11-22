@@ -59,27 +59,20 @@ func (g *gallery) view(c *ui.Context) {
 }
 
 func (g *gallery) sidebar(c *ui.Context) {
-	mallow.Card(c, mallow.Large).Width(200).Shrink(0).Padding(28, 16).Gap(24).Children(func() {
-		ui.Column(c).PaddingX(12).Gap(4).Children(func() {
-			ui.Text(c, "mallow").FontSize(20).FontWeight(600).TextColor(mallow.Text)
-			ui.Text(c, "新拟态组件库").FontSize(12).TextColor(mallow.Muted)
-		})
-		mallow.Groove(c).MarginX(4)
-		ui.Column(c).Grow(1).Gap(12).Role(ui.RoleTabList).Label("导航").Children(func() {
-			for _, name := range []string{"组件", "表单", "设置"} {
-				if mallow.NavItem(c.Key(name), name, g.nav == name).Clicked() {
-					g.nav = name
-				}
-			}
-		})
-		ui.Column(c).Gap(10).Children(func() {
+	mallow.Sidebar(c, mallow.SidebarOptions{
+		Title:    "mallow",
+		Subtitle: "新拟态组件库",
+		Width:    200,
+		Items:    []mallow.Item{{ID: "组件", Label: "组件"}, {ID: "表单", Label: "表单"}, {ID: "设置", Label: "设置"}},
+		Selected: &g.nav,
+		Footer: func() {
 			mallow.Label(c, "外观").PaddingX(8)
 			mallow.Segmented(c, "外观", &g.mode, []mallow.Option{
 				{Value: string(mallow.ModeLight), Label: "浅色"},
 				{Value: string(mallow.ModeDark), Label: "深色"},
 				{Value: string(mallow.ModeSystem), Label: "系统"},
 			})
-		})
+		},
 	})
 }
 

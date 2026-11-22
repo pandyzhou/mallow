@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/png"
 	"os"
 	"strings"
@@ -121,5 +122,42 @@ func TestScreenshot(t *testing.T) {
 	defer f.Close()
 	if err := png.Encode(f, tt.Image()); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// The sidebar's entries choose the page; the recess follows the choice.
+func TestSidebar(t *testing.T) {
+	g, tt := newTester(t)
+	click(t, tt, "表单")
+	if g.nav != "表单" {
+		t.Fatalf("nav %q after choosing 表单", g.nav)
+	}
+	click(t, tt, "设置")
+	click(t, tt, "组件")
+	if g.nav != "组件" {
+		t.Errorf("nav %q after choosing 组件", g.nav)
+	}
+}
+
+// TestSidebarFrames writes frames of the recess sliding from 组件 to 设置
+// to MALLOW_FRAMES_DIR, to look at the motion.
+func TestSidebarFrames(t *testing.T) {
+	dir := os.Getenv("MALLOW_FRAMES_DIR")
+	if dir == "" {
+		t.Skip("set MALLOW_FRAMES_DIR to write frames")
+	}
+	_, tt := newTester(t)
+	tt.Advance(time.Second)
+	click(t, tt, "设置")
+	for i, ms := range []int{0, 60, 120, 200, 320, 600} {
+		if i > 0 {
+			tt.Advance(time.Duration(ms-[]int{0, 60, 120, 200, 320, 600}[i-1]) * time.Millisecond)
+		}
+		f, err := os.Create(fmt.Sprintf("%s/frame-%03dms.png", dir, ms))
+		if err != nil {
+			t.Fatal(err)
+		}
+		png.Encode(f, tt.Image())
+		f.Close()
 	}
 }

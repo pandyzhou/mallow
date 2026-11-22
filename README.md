@@ -17,7 +17,7 @@
 | 按钮 | `Button`、`PrimaryButton`、`IconButton`、`GhostIconButton`，以及 `Glyph*` 图形 |
 | 选择 | `Check` 勾选、`CheckDisc`、`Switch` 开关、`Segmented` 分段选择 |
 | 输入 | `TextInput` |
-| 导航 | `NavItem` |
+| 导航 | `Sidebar` 侧边栏、`NavList` 导航列表（选中高亮块用弹簧动画滑动切换，类似 macOS）、`NavItem` 单个导航项 |
 | 浮层 | `Tooltip` |
 | 窗口 | `TitleBar` 自绘标题栏、`WindowButtons` 窗口按钮 |
 
