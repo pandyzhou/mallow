@@ -23,6 +23,7 @@ type gallery struct {
 	win mallow.Window
 
 	mode    string
+	style   string
 	nav     string
 	period  string
 	checks  [3]bool
@@ -48,6 +49,7 @@ type gallery struct {
 func newGallery() *gallery {
 	return &gallery{
 		mode:   string(mallow.ModeSystem),
+		style:  string(mallow.StyleNeumorphism),
 		nav:    "组件",
 		period: "week",
 		checks: [3]bool{true, false, false},
@@ -60,7 +62,7 @@ func newGallery() *gallery {
 }
 
 func (g *gallery) view(c *ui.Context) {
-	mallow.UseMode(c, mallow.Mode(g.mode))
+	mallow.UseStyle(c, mallow.Style(g.style), mallow.Mode(g.mode))
 	ui.Column(c).Fill().Children(func() {
 		mallow.TitleBar(c, g.win, func() {
 			ui.Text(c, "mallow").FontSize(13).FontWeight(600).TextColor(mallow.Muted)
@@ -83,6 +85,11 @@ func (g *gallery) sidebar(c *ui.Context) {
 		Selected: &g.nav,
 		Bottom:   []mallow.Item{{ID: "关于", Label: "关于"}},
 		Footer: func() {
+			mallow.Label(c, "风格").PaddingX(8)
+			mallow.Segmented(c, "风格", &g.style, []mallow.Option{
+				{Value: string(mallow.StyleNeumorphism), Label: "新拟态"},
+				{Value: string(mallow.StyleOrganic), Label: "自然有机"},
+			})
 			mallow.Label(c, "外观").PaddingX(8)
 			mallow.Segmented(c, "外观", &g.mode, []mallow.Option{
 				{Value: string(mallow.ModeLight), Label: "浅色"},

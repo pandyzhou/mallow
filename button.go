@@ -5,6 +5,19 @@ import "github.com/egoist/mygo/ui"
 // press styles b by its state: raised by d at rest, half as deep while
 // hovered, pressed in while held.
 func press(b ui.Element, d Depth) {
+	if look == Organic {
+		// Nothing moves: the fill deepens under the pointer, and takes
+		// the tint of what is chosen while held.
+		Raised(b, d)
+		switch {
+		case b.Pressed():
+			b.Background(Select)
+		case b.Hovered():
+			b.Background(Hover)
+		}
+		Soft(b)
+		return
+	}
 	switch {
 	case b.Pressed():
 		Recessed(b, d/2)
@@ -35,6 +48,12 @@ func PrimaryButton(c *ui.Context, label string) ui.Element {
 		AlignItems(ui.Center).Justify(ui.Center).Cursor(ui.CursorPointer)
 	press(b, Small)
 	b.Background(Accent)
+	if look == Organic {
+		b.Border(1, ui.Transparent)
+		if b.Hovered() {
+			b.Background(Accent.Mix(Base, 0.12))
+		}
+	}
 	b.Children(func() {
 		ui.Text(c, label).FontSize(14).FontWeight(500).TextColor(OnAccent).SingleLine()
 	})
@@ -97,7 +116,10 @@ func GhostIconButton(c *ui.Context, label string, glyph Glyph, style IconButtonS
 		size = 24
 	}
 	b := ui.ButtonBase(c.Key(label)).Label(label).Size(size, size).Radius(RadiusPill).
-		AlignItems(ui.Center).Justify(ui.Center).Cursor(ui.CursorPointer).Background(Base)
+		AlignItems(ui.Center).Justify(ui.Center).Cursor(ui.CursorPointer)
+	if look == Neumorphism {
+		b.Background(Base)
+	}
 	color := glyphColor(b, style, false)
 	Tooltip(c, b, label)
 	b.Children(func() { glyph(c, color) })

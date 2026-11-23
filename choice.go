@@ -6,9 +6,15 @@ import "github.com/egoist/mygo/ui"
 // and checked when on.
 func CheckDisc(c *ui.Context, on bool) ui.Element {
 	disc := ui.Box(c).Size(18, 18).Shrink(0).Radius(RadiusPill).AlignItems(ui.Center).Justify(ui.Center)
-	if on {
+	switch {
+	case on && look == Organic:
+		disc.Background(Accent).Border(1.5, Accent)
+	case on:
 		disc.Background(Accent).Shadow(2, 2, 4, 0, Dark).Shadow(-2, -2, 4, 0, Light)
-	} else {
+	case look == Organic:
+		// An empty ring, a little darker than a hairline, to be seen.
+		disc.Background(Control).Border(1.5, Dark)
+	default:
 		Recessed(disc, Tiny)
 	}
 	return Soft(disc).Children(func() {

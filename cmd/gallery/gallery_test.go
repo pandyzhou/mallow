@@ -80,6 +80,29 @@ func TestSegmented(t *testing.T) {
 	}
 }
 
+// The other look draws the same components flat, in earth tones; choosing
+// neumorphism again brings its palette back.
+func TestStyle(t *testing.T) {
+	g, tt := newTester(t)
+	click(t, tt, "自然有机")
+	if g.style != string(mallow.StyleOrganic) || mallow.CurrentLook() != mallow.Organic || mallow.Base != mallow.OrganicLightPalette.Base {
+		t.Fatalf("style %q, base %v after choosing 自然有机", g.style, mallow.Base)
+	}
+	if mallow.Canvas == mallow.Base {
+		t.Errorf("the organic canvas is the color of its cards, %v", mallow.Base)
+	}
+	// Its components work as they do in the other look.
+	click(t, tt, "月")
+	click(t, tt, "深色")
+	if g.period != "month" || mallow.Base != mallow.OrganicDarkPalette.Base {
+		t.Errorf("in the organic look: period %q, base %v after choosing 月 and 深色", g.period, mallow.Base)
+	}
+	click(t, tt, "新拟态")
+	if mallow.CurrentLook() != mallow.Neumorphism || mallow.Base != mallow.DarkPalette.Base || mallow.Canvas != mallow.Base {
+		t.Errorf("back in neumorphism: base %v, canvas %v", mallow.Base, mallow.Canvas)
+	}
+}
+
 func TestTextInput(t *testing.T) {
 	g, tt := newTester(t)
 	click(t, tt, "名字")
@@ -153,6 +176,10 @@ func TestScreenshot(t *testing.T) {
 	g, tt := newTester(t)
 	if m := os.Getenv("MALLOW_SCREENSHOT_THEME"); m != "" {
 		g.mode = m
+	}
+	// MALLOW_SCREENSHOT_STYLE picks the look: neumorphism or organic.
+	if s := os.Getenv("MALLOW_SCREENSHOT_STYLE"); s != "" {
+		g.style = s
 	}
 	if os.Getenv("MALLOW_SCREENSHOT_SCALE") == "2" {
 		tt.SetScale(2)

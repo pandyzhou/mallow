@@ -6,14 +6,6 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-// Radii.
-const (
-	RadiusCard    = 24
-	RadiusControl = 16
-	RadiusSmall   = 12
-	RadiusPill    = 999
-)
-
 // Depth is how far an element stands out of, or sinks into, the surface: the
 // shadow offset, whose blur is twice that. Keep elements at least twice
 // their depth apart, so that their shadows don't meet.
@@ -28,6 +20,14 @@ const (
 
 // Raised makes e stand out of the surface.
 func Raised(e ui.Element, d Depth) ui.Element {
+	if look == Organic {
+		// A card lies on the canvas under a faint shadow of bark; a
+		// control is a shade lighter than its card, in a hairline.
+		if d >= Medium {
+			return e.Background(Base).Shadow(0, 8, 24, 0, Text.Alpha(0.08))
+		}
+		return e.Background(Control).Border(1, Line)
+	}
 	o := float32(d)
 	return e.Background(Base).
 		Shadow(o, o, 2*o, 0, Dark).
@@ -38,6 +38,11 @@ func Raised(e ui.Element, d Depth) ui.Element {
 // GPU every pixel of e, the middle too, so keep it for controls; a large
 // well takes RecessedWide.
 func Recessed(e ui.Element, d Depth) ui.Element {
+	if look == Organic {
+		// What is chosen or pressed, and the tracks controls move in,
+		// take a tint of sage.
+		return e.Background(Select).Border(1, ui.Transparent)
+	}
 	o := float32(d)
 	return e.Background(Base).
 		InsetShadow(o, o, 2*o, 0, Dark).
@@ -51,6 +56,9 @@ func Recessed(e ui.Element, d Depth) ui.Element {
 // e, clipped to its corners, and outer shadows cost only the band where they
 // show.
 func RecessedWide(e ui.Element, d Depth, radius float32) ui.Element {
+	if look == Organic {
+		return e.Background(Canvas).Radius(radius)
+	}
 	o := float32(d)
 	blur := 2 * o
 	// A strip thicker than the blur's reach casts as a whole half-plane would.
@@ -93,6 +101,12 @@ func Tray(c *ui.Context, d Depth) ui.Element {
 // Groove is a divider pressed into the surface: a thin channel, the way soft
 // UI separates parts without a line of another color.
 func Groove(c *ui.Context) ui.Element {
+	if look == Organic {
+		// A hairline, in the middle of the room a groove takes.
+		return ui.Box(c).Height(4).Shrink(0).Draw(func(p *ui.Painter, r ui.Rect) {
+			p.Fill(ui.Rect{X: r.X, Y: r.Y + 1.5, W: r.W, H: 1}, Line, 0)
+		})
+	}
 	return ui.Box(c).Height(4).Shrink(0).Radius(2).Background(Base).
 		InsetShadow(1, 1, 2, 0, Dark).
 		InsetShadow(-1, -1, 2, 0, Light)
@@ -101,6 +115,11 @@ func Groove(c *ui.Context) ui.Element {
 // GrooveV is Groove standing up, between the parts of a row: it is as tall
 // as the row when the row stretches its children.
 func GrooveV(c *ui.Context) ui.Element {
+	if look == Organic {
+		return ui.Box(c).Width(4).Shrink(0).Draw(func(p *ui.Painter, r ui.Rect) {
+			p.Fill(ui.Rect{X: r.X + 1.5, Y: r.Y, W: 1, H: r.H}, Line, 0)
+		})
+	}
 	return ui.Box(c).Width(4).Shrink(0).Radius(2).Background(Base).
 		InsetShadow(1, 1, 2, 0, Dark).
 		InsetShadow(-1, -1, 2, 0, Light)

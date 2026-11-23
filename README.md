@@ -6,6 +6,8 @@
 
 所有元素都与所在的表面同色，光从左上方照来：凸起的元素上方是高光、下方是阴影，凹陷的元素则把这对阴影收进内侧。没有边框，大圆角，只用一种强调色。自带浅色、深色两套配色，可以跟随系统切换。
 
+另有第二种风格**自然有机**（[Natural Organic](https://www.stylekit.top/zh/styles/natural-organic)）：大地色，奶油色的底、亚麻色的卡片，控件圆润并带一道细线，选中的地方染一层鼠尾草绿，不用纯黑。同一套组件，换一种画法：`mallow.UseStyle(c, mallow.StyleOrganic, mode)`。它的深色配色是 mallow 自己配的，原风格只定义了浅色。
+
 每个组件的外观都由 mallow 自己绘制。交互基于 MyGo 的无样式底座（`ButtonBase`、`CheckboxBase`、`TextInputBase` 等），由底座负责鼠标、键盘、焦点、输入法和无障碍，不使用 MyGo 自带的成品控件。
 
 ## 组件

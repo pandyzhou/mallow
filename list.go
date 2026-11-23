@@ -14,9 +14,15 @@ func CheckMark(c *ui.Context, on *bool, label string) ui.Element {
 // into the surface while it is. Give it children, as a CheckMark and a
 // Plain button that chooses it.
 func ListRow(c *ui.Context, chosen bool) ui.Element {
-	row := ui.Row(c).Padding(2, 8, 2, 4).Gap(4).AlignItems(ui.Center).Radius(RadiusSmall).Background(Base)
-	if chosen {
-		row.InsetShadow(2, 2, 4, 0, Dark).InsetShadow(-2, -2, 4, 0, Light)
+	row := ui.Row(c).Padding(2, 8, 2, 4).Gap(4).AlignItems(ui.Center).Radius(RadiusSmall)
+	switch {
+	case look == Organic && chosen:
+		row.Background(Select)
+	case look == Organic:
+	case chosen:
+		row.Background(Base).InsetShadow(2, 2, 4, 0, Dark).InsetShadow(-2, -2, 4, 0, Light)
+	default:
+		row.Background(Base)
 	}
 	return Soft(row)
 }
