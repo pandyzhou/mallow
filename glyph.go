@@ -93,3 +93,8 @@ func GlyphDone(c *ui.Context, color ui.Color) {
 func GlyphEdit(c *ui.Context, color ui.Color) {
 	ui.Text(c, "✎").FontSize(13).TextColor(color)
 }
+
+// GlyphSettings is a gear: the settings.
+func GlyphSettings(c *ui.Context, color ui.Color) {
+	ui.Text(c, "⚙").FontSize(16).TextColor(color)
+}

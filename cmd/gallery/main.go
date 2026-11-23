@@ -129,6 +129,7 @@ func (g *gallery) sections(c *ui.Context) {
 					mallow.GhostIconButton(c, "移除", mallow.GlyphClose, mallow.IconButtonStyle{Danger: true})
 					mallow.GhostIconButton(c, "丢弃", mallow.GlyphTrash, mallow.IconButtonStyle{Danger: true})
 					mallow.GhostIconButton(c, "改名", mallow.GlyphEdit, mallow.IconButtonStyle{})
+					mallow.GhostIconButton(c, "偏好", mallow.GlyphSettings, mallow.IconButtonStyle{})
 				})
 				ui.Text(c, fmt.Sprintf("普通按钮点了 %d 次，主要按钮点了 %d 次", g.clicks, g.primary)).
 					FontSize(12).TextColor(mallow.Muted)
