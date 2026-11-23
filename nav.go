@@ -57,7 +57,8 @@ const (
 
 // NavList is a column of entries choosing one into *selected, as macOS's
 // source lists: one recess marks the chosen entry and, when the choice
-// changes, slides over to the new one (Slide). It reports whether the
+// changes, slides over to the new one (Slide). The entries not chosen are
+// raised a little, as buttons. It reports whether the
 // choice changed.
 func NavList(c *ui.Context, label string, selected *string, items []Item) bool {
 	idx := -1
@@ -79,7 +80,18 @@ func NavList(c *ui.Context, label string, selected *string, items []Item) bool {
 			mark.Top(y)
 		}
 		for i, it := range items {
-			if navEntry(c.Key(it.ID), it.Label, i == idx).Clicked() && i != idx {
+			entry := navEntry(c.Key(it.ID), it.Label, i == idx)
+			// Those not chosen stand out of the surface a little, more
+			// under the pointer: flat text does not look like something
+			// to click, least of all when it is the only entry.
+			switch {
+			case i == idx:
+			case entry.Hovered():
+				Soft(Raised(entry, Small))
+			default:
+				Soft(Raised(entry, Tiny))
+			}
+			if entry.Clicked() && i != idx {
 				*selected, changed = it.ID, true
 			}
 		}
