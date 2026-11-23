@@ -212,6 +212,11 @@ func TestSidebar(t *testing.T) {
 	if g.nav != "组件" {
 		t.Errorf("nav %q after choosing 组件", g.nav)
 	}
+	// The entries at the bottom choose into the same selection.
+	click(t, tt, "关于")
+	if g.nav != "关于" {
+		t.Errorf("nav %q after choosing 关于 at the bottom", g.nav)
+	}
 }
 
 // TestSidebarFrames writes frames of the recess sliding from 组件 to 设置

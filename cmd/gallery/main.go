@@ -81,6 +81,7 @@ func (g *gallery) sidebar(c *ui.Context) {
 		Width:    200,
 		Items:    []mallow.Item{{ID: "组件", Label: "组件"}, {ID: "表单", Label: "表单"}, {ID: "设置", Label: "设置"}},
 		Selected: &g.nav,
+		Bottom:   []mallow.Item{{ID: "关于", Label: "关于"}},
 		Footer: func() {
 			mallow.Label(c, "外观").PaddingX(8)
 			mallow.Segmented(c, "外观", &g.mode, []mallow.Option{

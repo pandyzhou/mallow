@@ -159,6 +159,9 @@ type SidebarOptions struct {
 	// Items are the entries of its navigation, choosing into Selected.
 	Items    []Item
 	Selected *string
+	// Bottom are entries set apart at the bottom, choosing into Selected
+	// too: what is not one of the app's parts, as its settings.
+	Bottom []Item
 	// Footer builds what goes at the bottom, as an appearance switch; nil
 	// for nothing.
 	Footer func()
@@ -167,8 +170,8 @@ type SidebarOptions struct {
 }
 
 // Sidebar is a raised panel running down the side of a window: a title, a
-// groove, a NavList whose recess slides between its entries, and a footer
-// at the bottom. It reports whether the choice changed.
+// groove, a NavList whose recess slides between its entries, and at the
+// bottom more entries, set apart, and a footer. It reports whether the choice changed.
 func Sidebar(c *ui.Context, o SidebarOptions) bool {
 	width := o.Width
 	if width == 0 {
@@ -190,6 +193,11 @@ func Sidebar(c *ui.Context, o SidebarOptions) bool {
 		ui.Column(c).Grow(1).MinHeight(0).Children(func() {
 			changed = NavList(c, o.Title+"导航", o.Selected, o.Items)
 		})
+		if len(o.Bottom) > 0 {
+			if NavList(c, o.Title+"其他", o.Selected, o.Bottom) {
+				changed = true
+			}
+		}
 		if o.Footer != nil {
 			ui.Column(c).Gap(10).Children(o.Footer)
 		}
