@@ -1,6 +1,10 @@
 package mallow
 
-import "github.com/egoist/mygo/ui"
+import (
+	"math"
+
+	"github.com/egoist/mygo/ui"
+)
 
 // Glyphs drawn from boxes and text, sized for IconButton.
 
@@ -89,12 +93,50 @@ func GlyphDone(c *ui.Context, color ui.Color) {
 	})
 }
 
+// drawn is a glyph drawn as paths in a box of 16 by 16: draw builds them
+// with the box's top left corner at (x, y).
+func drawn(c *ui.Context, draw func(p *ui.Painter, x, y float32)) {
+	ui.Box(c).Size(16, 16).Shrink(0).Draw(func(p *ui.Painter, r ui.Rect) { draw(p, r.X, r.Y) })
+}
+
 // GlyphEdit is a pencil: for changing what is written, as a name.
 func GlyphEdit(c *ui.Context, color ui.Color) {
-	ui.Text(c, "✎").FontSize(13).TextColor(color)
+	drawn(c, func(p *ui.Painter, x, y float32) {
+		// The pencil, from its point at the bottom left up to its end,
+		// and the line where the end's band begins.
+		pen := new(ui.Path).MoveTo(x+2.5, y+13.5).LineTo(x+3.2, y+10.4).LineTo(x+10.8, y+2.8).
+			LineTo(x+13.2, y+5.2).LineTo(x+5.6, y+12.8).Close()
+		pen.MoveTo(x+9.2, y+4.4).LineTo(x+11.6, y+6.8)
+		p.StrokePath(pen, 1.3, color)
+	})
 }
 
 // GlyphSettings is a gear: the settings.
 func GlyphSettings(c *ui.Context, color ui.Color) {
-	ui.Text(c, "⚙").FontSize(16).TextColor(color)
+	drawn(c, func(p *ui.Painter, x, y float32) {
+		const (
+			teeth        = 8
+			inner, outer = 4.7, 6.7   // the radii of the wheel and of its teeth
+			foot, top    = 0.21, 0.13 // half a tooth's angle, at each of them
+		)
+		gear := new(ui.Path)
+		at := func(angle, radius float64, first bool) {
+			px, py := x+8+float32(radius*math.Cos(angle)), y+8+float32(radius*math.Sin(angle))
+			if first {
+				gear.MoveTo(px, py)
+			} else {
+				gear.LineTo(px, py)
+			}
+		}
+		for i := range teeth {
+			a := 2 * math.Pi * float64(i) / teeth
+			at(a-foot, inner, i == 0)
+			at(a-top, outer, false)
+			at(a+top, outer, false)
+			at(a+foot, inner, false)
+		}
+		gear.Close()
+		gear.Circle(x+8, y+8, 2.1)
+		p.StrokePath(gear, 1.3, color)
+	})
 }
