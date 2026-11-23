@@ -55,11 +55,20 @@ func GlyphRepeat(c *ui.Context, color ui.Color) {
 	ui.Text(c, "↻").FontSize(14).FontWeight(600).TextColor(color)
 }
 
-// GlyphTrash is a bin with its lid, for deleting.
+// GlyphTrash is a bin: its lid with a handle, and its body with two
+// slats, for deleting.
 func GlyphTrash(c *ui.Context, color ui.Color) {
-	ui.Column(c).AlignItems(ui.Center).Gap(1.5).Children(func() {
-		ui.Box(c).Size(11, 1.5).Radius(1).Background(color)
-		ui.Box(c).Size(8, 8).Radius(2).Border(1.5, color)
+	drawn(c, func(p *ui.Painter, x, y float32) {
+		bin := new(ui.Path)
+		// The lid, and the handle on it.
+		bin.MoveTo(x+2.5, y+4.5).LineTo(x+13.5, y+4.5)
+		bin.MoveTo(x+6, y+4.5).LineTo(x+6, y+2.5).LineTo(x+10, y+2.5).LineTo(x+10, y+4.5)
+		// The body, narrower at the bottom.
+		bin.MoveTo(x+4, y+4.5).LineTo(x+4.7, y+13.5).LineTo(x+11.3, y+13.5).LineTo(x+12, y+4.5)
+		// The slats.
+		bin.MoveTo(x+6.7, y+7).LineTo(x+6.9, y+11)
+		bin.MoveTo(x+9.3, y+7).LineTo(x+9.1, y+11)
+		p.StrokePath(bin, 1.3, color)
 	})
 }
 
