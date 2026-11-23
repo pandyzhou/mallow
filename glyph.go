@@ -50,3 +50,11 @@ func GlyphCheck(c *ui.Context, color ui.Color) {
 func GlyphRepeat(c *ui.Context, color ui.Color) {
 	ui.Text(c, "↻").FontSize(14).FontWeight(600).TextColor(color)
 }
+
+// GlyphTrash is a bin with its lid, for deleting.
+func GlyphTrash(c *ui.Context, color ui.Color) {
+	ui.Column(c).AlignItems(ui.Center).Gap(1.5).Children(func() {
+		ui.Box(c).Size(11, 1.5).Radius(1).Background(color)
+		ui.Box(c).Size(8, 8).Radius(2).Border(1.5, color)
+	})
+}

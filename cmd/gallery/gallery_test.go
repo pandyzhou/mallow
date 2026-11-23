@@ -29,7 +29,8 @@ func newTester(t *testing.T) (*gallery, *ui.Tester) {
 	t.Helper()
 	g := newGallery()
 	g.win = &fakeWindow{}
-	return g, ui.NewTester(g.view, 1180, 820)
+	// Tall enough to show every section, so that tests can click them.
+	return g, ui.NewTester(g.view, 1180, 1700)
 }
 
 func click(t *testing.T, tt *ui.Tester, label string) {
@@ -85,6 +86,36 @@ func TestTextInput(t *testing.T) {
 	tt.Type("Ada")
 	if g.name != "Ada" {
 		t.Errorf("name %q after typing", g.name)
+	}
+}
+
+func TestListRowAndChip(t *testing.T) {
+	g, tt := newTester(t)
+	click(t, tt, "打开预约体检")
+	if g.chosen != 2 {
+		t.Errorf("chosen %d after opening the third row", g.chosen)
+	}
+	click(t, tt, "完成买菜")
+	if !g.tasks[0] || g.chosen != 2 {
+		t.Errorf("tasks %v, chosen %d after checking the first row", g.tasks, g.chosen)
+	}
+	click(t, tt, "生活")
+	if g.chip != "生活" {
+		t.Errorf("chip %q after choosing 生活", g.chip)
+	}
+}
+
+func TestCalendar(t *testing.T) {
+	g, tt := newTester(t)
+	g.calMonth = time.Date(2026, 11, 23, 0, 0, 0, 0, time.Local)
+	tt.Frame()
+	click(t, tt, "11月30日")
+	if g.calDate != "2026-11-30" {
+		t.Errorf("date %q after picking the 30th", g.calDate)
+	}
+	click(t, tt, "下个月")
+	if g.calMonth.Month() != time.December {
+		t.Errorf("month %v after the next arrow", g.calMonth.Month())
 	}
 }
 

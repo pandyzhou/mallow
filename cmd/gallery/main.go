@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"time"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
@@ -32,6 +33,13 @@ type gallery struct {
 	clicks  int
 	primary int
 	repeat  bool
+
+	tasks    [3]bool
+	chosen   int
+	chip     string
+	memo     string
+	calMonth time.Time
+	calDate  string
 }
 
 func newGallery() *gallery {
@@ -41,6 +49,10 @@ func newGallery() *gallery {
 		period: "week",
 		checks: [3]bool{true, false, false},
 		sync:   true,
+
+		chosen:   1,
+		chip:     "工作",
+		calMonth: time.Now(),
 	}
 }
 
@@ -111,6 +123,7 @@ func (g *gallery) sections(c *ui.Context) {
 						g.repeat = !g.repeat
 					}
 					mallow.GhostIconButton(c, "移除", mallow.GlyphClose, mallow.IconButtonStyle{Danger: true})
+					mallow.GhostIconButton(c, "丢弃", mallow.GlyphTrash, mallow.IconButtonStyle{Danger: true})
 				})
 				ui.Text(c, fmt.Sprintf("普通按钮点了 %d 次，主要按钮点了 %d 次", g.clicks, g.primary)).
 					FontSize(12).TextColor(mallow.Muted)
@@ -119,6 +132,25 @@ func (g *gallery) sections(c *ui.Context) {
 				for i, label := range []string{"写周报", "读书 30 分钟", "整理房间"} {
 					mallow.Check(c.Key(i), &g.checks[i], label)
 				}
+			})
+			section(c, "列表行 ListRow · 小标签 Chip", func() {
+				for i, title := range []string{"买菜", "交水电费", "预约体检"} {
+					mallow.ListRow(c.Key(i), g.chosen == i).Children(func() {
+						mallow.CheckMark(c, &g.tasks[i], "完成"+title)
+						if mallow.Plain(c, "打开"+title).Grow(1).Padding(6, 4).Children(func() {
+							ui.Text(c, title).FontSize(14).TextColor(mallow.Text)
+						}).Clicked() {
+							g.chosen = i
+						}
+					})
+				}
+				ui.Row(c).Gap(10).Wrap().Children(func() {
+					for _, name := range []string{"收集箱", "工作", "生活"} {
+						if mallow.Chip(c, name, g.chip == name).Clicked() {
+							g.chip = name
+						}
+					}
+				})
 			})
 			section(c, "开关 Switch", func() {
 				mallow.Switch(c.Key("sync"), &g.sync, "自动同步")
@@ -135,6 +167,17 @@ func (g *gallery) sections(c *ui.Context) {
 			section(c, "输入框 TextInput", func() {
 				mallow.TextInput(c, &g.name).Placeholder("你的名字").Label("名字")
 				mallow.TextInput(c, &g.note).Placeholder("回车提交").Label("备注")
+			})
+			section(c, "多行输入 TextArea", func() {
+				mallow.TextArea(c, &g.memo).Placeholder("备注，可以写多行").Label("多行备注")
+			})
+			section(c, "日历 Calendar", func() {
+				mallow.Calendar(c, "日期", &g.calMonth, &g.calDate, time.Now())
+				date := g.calDate
+				if date == "" {
+					date = "未选"
+				}
+				ui.Text(c, "选中："+date).FontSize(12).TextColor(mallow.Muted)
 			})
 			section(c, "表面 Surface", func() {
 				ui.Row(c).Gap(24).Children(func() {
