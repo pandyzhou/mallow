@@ -145,19 +145,32 @@ func TestSidebar(t *testing.T) {
 
 // TestSidebarFrames writes frames of the recess sliding from 组件 to 设置
 // to MALLOW_FRAMES_DIR, to look at the motion.
-func TestSidebarFrames(t *testing.T) {
+func TestSidebarFrames(t *testing.T) { frames(t, "sidebar", "设置") }
+
+// TestSegmentedFrames writes frames of the thumb sliding from 日 past 周 to
+// 月 to MALLOW_FRAMES_DIR.
+func TestSegmentedFrames(t *testing.T) {
+	frames(t, "segmented", "日", "月")
+}
+
+// frames clicks all but the last of labels, lets the view settle, clicks the
+// last and writes frames of what follows to MALLOW_FRAMES_DIR.
+func frames(t *testing.T, name string, labels ...string) {
 	dir := os.Getenv("MALLOW_FRAMES_DIR")
 	if dir == "" {
 		t.Skip("set MALLOW_FRAMES_DIR to write frames")
 	}
 	_, tt := newTester(t)
+	for _, l := range labels[:len(labels)-1] {
+		click(t, tt, l)
+	}
 	tt.Advance(time.Second)
-	click(t, tt, "设置")
+	click(t, tt, labels[len(labels)-1])
 	prev := 0
 	for _, ms := range []int{0, 40, 80, 120, 160, 220, 300, 500} {
 		tt.Advance(time.Duration(ms-prev) * time.Millisecond)
 		prev = ms
-		f, err := os.Create(fmt.Sprintf("%s/frame-%03dms.png", dir, ms))
+		f, err := os.Create(fmt.Sprintf("%s/%s-%03dms.png", dir, name, ms))
 		if err != nil {
 			t.Fatal(err)
 		}

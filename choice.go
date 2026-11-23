@@ -61,9 +61,9 @@ type Option struct {
 	Value, Label string
 }
 
-// Segmented chooses one of options into *value: a recessed track whose chosen
-// segment rises out of it, a radio group the arrows move through. It reports
-// whether the choice changed.
+// Segmented chooses one of options into *value: a recessed track on which a
+// raised thumb slides to the chosen segment, a radio group the arrows move
+// through. It reports whether the choice changed.
 func Segmented(c *ui.Context, label string, value *string, options []Option) bool {
 	idx := 0
 	for i, o := range options {
@@ -75,17 +75,27 @@ func Segmented(c *ui.Context, label string, value *string, options []Option) boo
 	seg := ui.SegmentedBase(c.Key(label), &idx, len(options))
 	seg.Track.Label(label).Padding(4).Gap(4).Radius(RadiusPill)
 	Recessed(seg.Track, 3).Children(func() {
+		// Where the segments were on the previous frame, for the thumb.
+		at := make([]ui.Rect, len(options))
 		for i, o := range options {
 			s := seg.Segment(i).Label(o.Label).Grow(1).Padding(6, 10).Radius(RadiusPill).
 				AlignItems(ui.Center).Justify(ui.Center).Cursor(ui.CursorPointer)
+			at[i] = s.Bounds()
 			color := Muted
 			if i == idx {
-				Raised(s, Tiny)
 				color = Accent
+				if at[i].W == 0 {
+					// The first frame knows no bounds yet: the segment
+					// itself is the thumb.
+					Raised(s, Tiny)
+				}
 			}
-			Soft(s).Children(func() {
+			s.Children(func() {
 				ui.Text(c, o.Label).FontSize(12).FontWeight(500).TextColor(color).SingleLine()
 			})
+		}
+		if idx < len(at) && at[idx].W > 0 {
+			segmentedThumb(c, seg.Track.Bounds(), at, idx)
 		}
 	})
 	if idx != before && idx < len(options) {
@@ -93,4 +103,21 @@ func Segmented(c *ui.Context, label string, value *string, options []Option) boo
 		return true
 	}
 	return false
+}
+
+// segmentedThumb draws the raised thumb of a Segmented control under its
+// segments, at the chosen one. What animates is the index, and the thumb
+// lies between the two segments around it: so it slides when the choice
+// changes, and keeps to its segment at once when the control is resized.
+func segmentedThumb(c *ui.Context, track ui.Rect, at []ui.Rect, idx int) {
+	thumb := ui.Box(c.Key("segmented-thumb")).Absolute().Radius(RadiusPill).PassThrough().ZIndex(-1)
+	Raised(thumb, Tiny)
+	t := thumb.AnimateTo("index", float32(idx), Slide)
+	t = min(max(t, 0), float32(len(at)-1))
+	lo := int(t)
+	hi := min(lo+1, len(at)-1)
+	f := t - float32(lo)
+	mix := func(a, b float32) float32 { return a + (b-a)*f }
+	thumb.Left(mix(at[lo].X, at[hi].X) - track.X).Top(at[idx].Y - track.Y).
+		Width(mix(at[lo].W, at[hi].W)).Height(at[idx].H)
 }
