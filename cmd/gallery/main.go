@@ -31,6 +31,7 @@ type gallery struct {
 	note    string
 	clicks  int
 	primary int
+	repeat  bool
 }
 
 func newGallery() *gallery {
@@ -103,6 +104,13 @@ func (g *gallery) sections(c *ui.Context) {
 					mallow.IconButton(c, "上一个", mallow.GlyphChevronLeft, mallow.IconButtonStyle{Size: 36})
 					mallow.IconButton(c, "添加", mallow.GlyphPlus, mallow.IconButtonStyle{Size: 36})
 					mallow.IconButton(c, "删除", mallow.GlyphClose, mallow.IconButtonStyle{Size: 36, Danger: true})
+				})
+				ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
+					mallow.Label(c, "无底图标按钮")
+					if mallow.GhostIconButton(c, "每周重复", mallow.GlyphRepeat, mallow.IconButtonStyle{Active: g.repeat}).Clicked() {
+						g.repeat = !g.repeat
+					}
+					mallow.GhostIconButton(c, "移除", mallow.GlyphClose, mallow.IconButtonStyle{Danger: true})
 				})
 				ui.Text(c, fmt.Sprintf("普通按钮点了 %d 次，主要按钮点了 %d 次", g.clicks, g.primary)).
 					FontSize(12).TextColor(mallow.Muted)

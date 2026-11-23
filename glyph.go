@@ -45,3 +45,8 @@ func GlyphPlus(c *ui.Context, color ui.Color) {
 func GlyphCheck(c *ui.Context, color ui.Color) {
 	ui.Text(c, "✓").FontSize(11).FontWeight(600).TextColor(color)
 }
+
+// GlyphRepeat is a circling arrow, for what comes back, as a weekly item.
+func GlyphRepeat(c *ui.Context, color ui.Color) {
+	ui.Text(c, "↻").FontSize(14).FontWeight(600).TextColor(color)
+}

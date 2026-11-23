@@ -47,6 +47,10 @@ func TestButtons(t *testing.T) {
 	if g.clicks != 1 || g.primary != 2 {
 		t.Errorf("clicks %d, primary %d", g.clicks, g.primary)
 	}
+	click(t, tt, "每周重复")
+	if !g.repeat {
+		t.Errorf("the repeat toggle is off after a click")
+	}
 }
 
 func TestCheckAndSwitch(t *testing.T) {

@@ -51,6 +51,22 @@ type IconButtonStyle struct {
 	// Danger turns the glyph the danger color while hovered, as a close or
 	// delete button.
 	Danger bool
+	// Active shows the glyph in the accent, for a button that is on, as a
+	// toggle whose setting is set.
+	Active bool
+}
+
+// glyphColor is the color of an icon button's glyph.
+func glyphColor(b ui.Element, style IconButtonStyle, pressed bool) ui.Color {
+	switch {
+	case b.Hovered() && !pressed && style.Danger:
+		return Danger
+	case style.Active:
+		return Accent
+	case b.Hovered() && !pressed:
+		return Text
+	}
+	return Muted
 }
 
 // IconButton is a round raised button holding a glyph, labelled for
@@ -62,13 +78,7 @@ func IconButton(c *ui.Context, label string, glyph Glyph, style IconButtonStyle)
 	}
 	b := ui.ButtonBase(c.Key(label)).Label(label).Size(size, size).Radius(RadiusPill).
 		AlignItems(ui.Center).Justify(ui.Center).Cursor(ui.CursorPointer)
-	color := Muted
-	if b.Hovered() && !b.Pressed() {
-		color = Text
-		if style.Danger {
-			color = Danger
-		}
-	}
+	color := glyphColor(b, style, b.Pressed())
 	d := Depth(3)
 	if size >= 36 {
 		d = Small
@@ -88,13 +98,7 @@ func GhostIconButton(c *ui.Context, label string, glyph Glyph, style IconButtonS
 	}
 	b := ui.ButtonBase(c.Key(label)).Label(label).Size(size, size).Radius(RadiusPill).
 		AlignItems(ui.Center).Justify(ui.Center).Cursor(ui.CursorPointer).Background(Base)
-	color := Muted
-	if b.Hovered() {
-		color = Text
-		if style.Danger {
-			color = Danger
-		}
-	}
+	color := glyphColor(b, style, false)
 	Tooltip(c, b, label)
 	b.Children(func() { glyph(c, color) })
 	return b
