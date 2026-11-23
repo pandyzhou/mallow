@@ -194,6 +194,12 @@ func (g *gallery) sections(c *ui.Context) {
 						})
 					}
 				})
+				// GrooveV parts a row the way Groove parts a column.
+				ui.Row(c).Gap(16).AlignItems(ui.Stretch).Children(func() {
+					ui.Text(c, "竖向凹槽左边").Grow(1).Basis(0).PaddingY(12).FontSize(13).TextColor(mallow.Muted)
+					mallow.GrooveV(c)
+					ui.Text(c, "竖向凹槽右边").Grow(1).Basis(0).PaddingY(12).FontSize(13).TextColor(mallow.Muted)
+				})
 			})
 		})
 	})

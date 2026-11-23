@@ -89,6 +89,16 @@ func TestTextInput(t *testing.T) {
 	}
 }
 
+// The upright groove stands between the two parts of its row.
+func TestGrooveV(t *testing.T) {
+	_, tt := newTester(t)
+	for _, s := range []string{"竖向凹槽左边", "竖向凹槽右边"} {
+		if !tt.HasText(s) {
+			t.Errorf("no %q beside the upright groove", s)
+		}
+	}
+}
+
 func TestListRowAndChip(t *testing.T) {
 	g, tt := newTester(t)
 	click(t, tt, "打开预约体检")

@@ -98,6 +98,14 @@ func Groove(c *ui.Context) ui.Element {
 		InsetShadow(-1, -1, 2, 0, Light)
 }
 
+// GrooveV is Groove standing up, between the parts of a row: it is as tall
+// as the row when the row stretches its children.
+func GrooveV(c *ui.Context) ui.Element {
+	return ui.Box(c).Width(4).Shrink(0).Radius(2).Background(Base).
+		InsetShadow(1, 1, 2, 0, Dark).
+		InsetShadow(-1, -1, 2, 0, Light)
+}
+
 // Label is the small caption above a group of controls.
 func Label(c *ui.Context, s string) ui.Element {
 	return ui.Text(c, s).FontSize(12).FontWeight(500).TextColor(Muted)
