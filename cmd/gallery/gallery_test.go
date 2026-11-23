@@ -170,6 +170,23 @@ func TestScreenshot(t *testing.T) {
 	}
 }
 
+// The context menu opens on a right click and reports the entry chosen.
+func TestContextMenu(t *testing.T) {
+	g, tt := newTester(t)
+	if tt.HasText("删掉它") {
+		t.Fatal("the menu shows before it is asked for")
+	}
+	if err := tt.RightClick("在这里点右键"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	click(t, tt, "删掉它")
+	tt.Frame()
+	if g.menuChoice != "删除" || g.menuOpen {
+		t.Errorf("choice %q, open %v after choosing 删掉它", g.menuChoice, g.menuOpen)
+	}
+}
+
 // A source list's entries choose, and show their notes.
 func TestSourceList(t *testing.T) {
 	g, tt := newTester(t)

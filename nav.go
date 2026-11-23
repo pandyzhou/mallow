@@ -45,6 +45,9 @@ type Item struct {
 	// count, are for a SourceList's entries.
 	Glyph func(c *ui.Context, color ui.Color)
 	Note  string
+	// With, if set, is called with a SourceList's entry once it is built:
+	// to give it more, as a ContextMenu.
+	With func(c *ui.Context, entry ui.Element)
 }
 
 const (
@@ -110,8 +113,12 @@ func SourceList(c *ui.Context, label string, selected *string, items []Item) boo
 			mark.Top(mark.AnimateTo("y", float32(idx*(sourceItemHeight+sourceItemGap)), Slide))
 		}
 		for i, it := range items {
-			if sourceEntry(c.Key(it.ID), it, i == idx).Clicked() && i != idx {
+			entry := sourceEntry(c.Key(it.ID), it, i == idx)
+			if entry.Clicked() && i != idx {
 				*selected, changed = it.ID, true
+			}
+			if it.With != nil {
+				it.With(c.Key(it.ID+"/with"), entry)
 			}
 		}
 	})

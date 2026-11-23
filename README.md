@@ -19,7 +19,7 @@
 | 输入 | `TextInput` 单行输入、`TextArea` 多行输入 |
 | 列表 | `ListRow` 可选中的列表行、`Plain` 无底按钮 |
 | 日期 | `Calendar` 月历，选一天 |
-| 导航 | `Sidebar` 侧边栏、`NavList` 导航列表（选中高亮块用弹簧动画滑动切换，类似 macOS）、`SourceList` 来源列表（紧凑、带图标和数量）、`NavItem` 单个导航项 |
+| 导航 | `Sidebar` 侧边栏、`NavList` 导航列表（选中高亮块用弹簧动画滑动切换，类似 macOS）、`SourceList` 来源列表（紧凑、带图标和数量）、`ContextMenu` 右键菜单、`NavItem` 单个导航项 |
 | 浮层 | `Tooltip` |
 | 窗口 | `TitleBar` 自绘标题栏、`WindowButtons` 窗口按钮 |
 

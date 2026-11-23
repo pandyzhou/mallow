@@ -34,13 +34,15 @@ type gallery struct {
 	primary int
 	repeat  bool
 
-	tasks    [3]bool
-	chosen   int
-	chip     string
-	memo     string
-	calMonth time.Time
-	calDate  string
-	source   string
+	tasks      [3]bool
+	chosen     int
+	chip       string
+	memo       string
+	calMonth   time.Time
+	calDate    string
+	source     string
+	menuOpen   bool
+	menuChoice string
 }
 
 func newGallery() *gallery {
@@ -163,6 +165,19 @@ func (g *gallery) sections(c *ui.Context) {
 						{ID: "done", Label: "做完的", Glyph: mallow.GlyphDone},
 					})
 				})
+			})
+			section(c, "右键菜单 ContextMenu", func() {
+				target := mallow.Button(c, "在这里点右键")
+				switch mallow.ContextMenu(c, target, &g.menuOpen, []mallow.MenuEntry{
+					{ID: "rename", Label: "改个名字", Glyph: mallow.GlyphEdit},
+					{ID: "delete", Label: "删掉它", Glyph: mallow.GlyphTrash, Danger: true},
+				}) {
+				case "rename":
+					g.menuChoice = "改名"
+				case "delete":
+					g.menuChoice = "删除"
+				}
+				ui.Text(c, "选了："+g.menuChoice).FontSize(12).TextColor(mallow.Muted)
 			})
 			section(c, "开关 Switch", func() {
 				mallow.Switch(c.Key("sync"), &g.sync, "自动同步")
