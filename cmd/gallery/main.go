@@ -40,6 +40,7 @@ type gallery struct {
 	memo     string
 	calMonth time.Time
 	calDate  string
+	source   string
 }
 
 func newGallery() *gallery {
@@ -150,6 +151,16 @@ func (g *gallery) sections(c *ui.Context) {
 							g.chip = name
 						}
 					}
+				})
+			})
+			section(c, "来源列表 SourceList", func() {
+				ui.Column(c).Width(220).Children(func() {
+					mallow.SourceList(c, "来源", &g.source, []mallow.Item{
+						{ID: "today", Label: "今日安排", Glyph: mallow.GlyphCalendar, Note: "4"},
+						{ID: "inbox", Label: "未整理", Glyph: mallow.GlyphInbox, Note: "2"},
+						{ID: "list", Label: "读书清单", Glyph: mallow.GlyphList},
+						{ID: "done", Label: "做完的", Glyph: mallow.GlyphDone},
+					})
 				})
 			})
 			section(c, "开关 Switch", func() {

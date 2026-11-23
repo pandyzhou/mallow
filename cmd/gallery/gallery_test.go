@@ -170,6 +170,19 @@ func TestScreenshot(t *testing.T) {
 	}
 }
 
+// A source list's entries choose, and show their notes.
+func TestSourceList(t *testing.T) {
+	g, tt := newTester(t)
+	click(t, tt, "未整理")
+	if g.source != "inbox" {
+		t.Fatalf("source %q after choosing 未整理", g.source)
+	}
+	click(t, tt, "做完的")
+	if g.source != "done" {
+		t.Errorf("source %q after choosing 做完的", g.source)
+	}
+}
+
 // The sidebar's entries choose the page; the recess follows the choice.
 func TestSidebar(t *testing.T) {
 	g, tt := newTester(t)

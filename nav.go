@@ -38,9 +38,13 @@ func navEntry(c *ui.Context, label string, chosen bool) ui.Element {
 	})
 }
 
-// Item is an entry of a NavList or a Sidebar.
+// Item is an entry of a NavList, a SourceList or a Sidebar.
 type Item struct {
 	ID, Label string
+	// Glyph, drawn before the label, and Note, small at the far end, as a
+	// count, are for a SourceList's entries.
+	Glyph func(c *ui.Context, color ui.Color)
+	Note  string
 }
 
 const (
@@ -78,6 +82,67 @@ func NavList(c *ui.Context, label string, selected *string, items []Item) bool {
 		}
 	})
 	return changed
+}
+
+const (
+	sourceItemHeight = 36
+	sourceItemGap    = 4
+)
+
+// SourceList is a NavList for many entries: lower ones set close together,
+// each a glyph, its label from the left and a note at the far end, as the
+// lists of a to-do app with how much each holds. Several can choose into
+// one *selected: the recess shows in the list that holds the choice. It
+// reports whether the choice changed.
+func SourceList(c *ui.Context, label string, selected *string, items []Item) bool {
+	idx := -1
+	for i, it := range items {
+		if it.ID == *selected {
+			idx = i
+		}
+	}
+	changed := false
+	ui.Column(c).Role(ui.RoleTabList).Label(label).Gap(sourceItemGap).Children(func() {
+		if idx >= 0 {
+			mark := ui.Box(c.Key("source-mark")).Absolute().Left(0).Right(0).Height(sourceItemHeight).
+				Radius(RadiusSmall).PassThrough().ZIndex(-1)
+			Recessed(mark, Tiny)
+			mark.Top(mark.AnimateTo("y", float32(idx*(sourceItemHeight+sourceItemGap)), Slide))
+		}
+		for i, it := range items {
+			if sourceEntry(c.Key(it.ID), it, i == idx).Clicked() && i != idx {
+				*selected, changed = it.ID, true
+			}
+		}
+	})
+	return changed
+}
+
+func sourceEntry(c *ui.Context, it Item, chosen bool) ui.Element {
+	item := ui.ButtonBase(c).Role(ui.RoleTab).Label(it.Label).AccessSelected(chosen).
+		Height(sourceItemHeight).PaddingX(12).Gap(10).Radius(RadiusSmall).
+		Justify(ui.Start).AlignItems(ui.Center).Cursor(ui.CursorPointer)
+	color := Muted
+	switch {
+	case chosen:
+		color = Accent
+	case item.Hovered():
+		color = Text
+	}
+	return item.Children(func() {
+		if it.Glyph != nil {
+			ui.Row(c).Size(16, 16).Shrink(0).Justify(ui.Center).AlignItems(ui.Center).Children(func() {
+				it.Glyph(c, color)
+			})
+		}
+		text := ui.Text(c, it.Label).Grow(1).MinWidth(0).FontSize(14).TextColor(color).SingleLine()
+		if chosen {
+			text.FontWeight(500)
+		}
+		if it.Note != "" {
+			ui.Text(c, it.Note).FontSize(12).TextColor(Muted)
+		}
+	})
 }
 
 // SidebarOptions describe a Sidebar.
