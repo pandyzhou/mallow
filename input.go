@@ -27,5 +27,7 @@ func underlined(in ui.Element) ui.Element {
 	if in.Focused() {
 		return in.InsetShadow(0, -2, 0, 0, Accent)
 	}
-	return in.InsetShadow(0, -1, 0, 0, Light).InsetShadow(0, -2, 1, 0, Dark)
+	// Without blur: a blurred inner shadow shades the sides of the field
+	// too, which shows as a thin upright line at each end.
+	return in.InsetShadow(0, -2.5, 0, 0, Dark).InsetShadow(0, -1, 0, 0, Light)
 }
