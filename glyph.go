@@ -88,3 +88,8 @@ func GlyphDone(c *ui.Context, color ui.Color) {
 		ui.Text(c, "✓").FontSize(8).FontWeight(700).TextColor(color)
 	})
 }
+
+// GlyphEdit is a pencil: for changing what is written, as a name.
+func GlyphEdit(c *ui.Context, color ui.Color) {
+	ui.Text(c, "✎").FontSize(13).TextColor(color)
+}
