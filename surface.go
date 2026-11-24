@@ -129,3 +129,29 @@ func GrooveV(c *ui.Context) ui.Element {
 func Label(c *ui.Context, s string) ui.Element {
 	return ui.Text(c, s).FontSize(12).FontWeight(500).TextColor(Muted)
 }
+
+// Hues are colors that tell things of a kind apart, as the courses of a
+// timetable or the series of a chart: take them in order, and around again.
+// They are given to Tinted, which makes of one what suits the palette.
+var Hues = []ui.Color{
+	ui.Hex("#ef6f5e"), // coral
+	ui.Hex("#3fae7a"), // green
+	ui.Hex("#5b8def"), // blue
+	ui.Hex("#9a78f0"), // violet
+	ui.Hex("#22b3b0"), // teal
+	ui.Hex("#e09a2b"), // amber
+	ui.Hex("#e56aa5"), // pink
+	ui.Hex("#7fa83a"), // olive
+}
+
+// Tinted makes e a surface of a hue: filled faintly with it, a line of it
+// around. It returns the color to write on it in: the hue, deepened on a
+// light palette and lightened on a dark one, to read on its own tint.
+func Tinted(e ui.Element, hue ui.Color) ui.Color {
+	fill, line := float32(0.16), float32(0.5)
+	if isDark {
+		fill, line = 0.22, 0.6
+	}
+	e.Background(Base.Mix(hue, fill)).Border(1, Base.Mix(hue, line))
+	return hue.Mix(Text, 0.3)
+}

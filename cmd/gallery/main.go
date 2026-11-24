@@ -312,6 +312,16 @@ func (g *gallery) sections(c *ui.Context) {
 						})
 					}
 				})
+				// Tinted tells things of a kind apart by their hues.
+				ui.Row(c).Gap(10).Wrap().Children(func() {
+					for i, hue := range mallow.Hues {
+						tile := ui.Column(c.Key(i)).Padding(8, 12).Radius(10)
+						ink := mallow.Tinted(tile, hue)
+						tile.Children(func() {
+							ui.Text(c, fmt.Sprintf("色调 %d", i+1)).FontSize(13).FontWeight(600).TextColor(ink)
+						})
+					}
+				})
 				// GrooveV parts a row the way Groove parts a column.
 				ui.Row(c).Gap(16).AlignItems(ui.Stretch).Children(func() {
 					ui.Text(c, "竖向凹槽左边").Grow(1).Basis(0).PaddingY(12).FontSize(13).TextColor(mallow.Muted)

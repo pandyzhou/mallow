@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"image/png"
 	"os"
 	"strings"
@@ -30,7 +31,7 @@ func newTester(t *testing.T) (*gallery, *ui.Tester) {
 	g := newGallery()
 	g.win = &fakeWindow{}
 	// Tall enough to show every section, so that tests can click them.
-	return g, ui.NewTester(g.view, 1180, 2100)
+	return g, ui.NewTester(g.view, 1180, 2300)
 }
 
 func click(t *testing.T, tt *ui.Tester, label string) {
@@ -431,5 +432,23 @@ func TestMarkdown(t *testing.T) {
 		if strings.Contains(texts, mark) {
 			t.Errorf("the Markdown shows its mark %q: %q", mark, tt.Texts())
 		}
+	}
+}
+
+// TestTinted checks that each hue shows as a tile of its own color, with
+// what is written on it in another color than the tile's.
+func TestTinted(t *testing.T) {
+	_, tt := newTester(t)
+	seen := map[color.RGBA]bool{}
+	for i := range mallow.Hues {
+		r, ok := tt.Find(fmt.Sprintf("色调 %d", i+1))
+		if !ok {
+			t.Fatalf("hue %d does not show: %q", i+1, tt.Texts())
+		}
+		// Just left of the text, inside the tile.
+		seen[tt.Image().RGBAAt(int(r.X)-6, int(r.Y+r.H/2))] = true
+	}
+	if len(seen) != len(mallow.Hues) {
+		t.Errorf("%d hues show as %d colors", len(mallow.Hues), len(seen))
 	}
 }
