@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/egoist/mygo"
@@ -44,6 +45,10 @@ type gallery struct {
 	source     string
 	menuOpen   bool
 	menuChoice string
+
+	dialogOpen bool
+	dialogName string // what is typed in the dialog
+	dialogMade string // what the dialog last made
 }
 
 func newGallery() *gallery {
@@ -72,6 +77,31 @@ func (g *gallery) view(c *ui.Context) {
 			ui.Scroll(c).Grow(1).MinWidth(0).Padding(8, 12, 24, 12).Gap(32).Children(func() {
 				g.sections(c)
 			})
+		})
+	})
+	g.dialog(c)
+}
+
+// dialog is the Dialog the gallery shows: it asks for a name, and makes
+// something of it.
+func (g *gallery) dialog(c *ui.Context) {
+	mallow.Dialog(c, &g.dialogOpen, mallow.DialogOptions{Title: "新建相册", Width: 400}, func() {
+		make := func() {
+			if name := strings.TrimSpace(g.dialogName); name != "" {
+				g.dialogMade, g.dialogOpen = name, false
+			}
+		}
+		name := mallow.TextInput(c, &g.dialogName).Placeholder("相册的名字，回车确认").Label("相册的名字").AutoFocus()
+		if name.Submitted() {
+			make()
+		}
+		ui.Row(c).Gap(12).Justify(ui.End).Children(func() {
+			if mallow.Button(c, "取消").Clicked() {
+				g.dialogOpen = false
+			}
+			if mallow.PrimaryButton(c, "建好").Clicked() {
+				make()
+			}
 		})
 	})
 }
@@ -206,6 +236,18 @@ func (g *gallery) sections(c *ui.Context) {
 			})
 			section(c, "多行输入 TextArea", func() {
 				mallow.TextArea(c, &g.memo).Placeholder("备注，可以写多行").Label("多行备注")
+			})
+			section(c, "对话框 Dialog", func() {
+				ui.Row(c).Gap(16).AlignItems(ui.Center).Children(func() {
+					if mallow.Button(c, "打开对话框").Clicked() {
+						g.dialogOpen, g.dialogName = true, ""
+					}
+					made := g.dialogMade
+					if made == "" {
+						made = "还没有"
+					}
+					ui.Text(c, "建好的相册："+made).FontSize(12).TextColor(mallow.Muted)
+				})
 			})
 			section(c, "日历 Calendar", func() {
 				mallow.Calendar(c, "日期", &g.calMonth, &g.calDate, time.Now())

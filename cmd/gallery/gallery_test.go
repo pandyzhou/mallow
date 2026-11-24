@@ -186,6 +186,13 @@ func TestScreenshot(t *testing.T) {
 	}
 	click(t, tt, "名字")
 	tt.Type("Ada")
+	// MALLOW_SCREENSHOT_CLICK lists what to click first, separated by
+	// commas, as 打开对话框 to show the dialog.
+	if s := os.Getenv("MALLOW_SCREENSHOT_CLICK"); s != "" {
+		for _, label := range strings.Split(s, ",") {
+			click(t, tt, label)
+		}
+	}
 	tt.Advance(time.Second)
 	f, err := os.Create(path)
 	if err != nil {
@@ -211,6 +218,55 @@ func TestContextMenu(t *testing.T) {
 	tt.Frame()
 	if g.menuChoice != "删除" || g.menuOpen {
 		t.Errorf("choice %q, open %v after choosing 删掉它", g.menuChoice, g.menuOpen)
+	}
+}
+
+// A dialog shows over the page while it is open, with the keyboard in its
+// field, and closes by Enter, by its buttons and by Escape.
+func TestDialog(t *testing.T) {
+	g, tt := newTester(t)
+	if tt.HasText("新建相册") {
+		t.Fatal("the dialog shows before it is asked for")
+	}
+	click(t, tt, "打开对话框")
+	tt.Frame()
+	if !tt.HasText("新建相册") {
+		t.Fatalf("no dialog after 打开对话框: %q", tt.Texts())
+	}
+	// The field has the keyboard as the dialog shows.
+	tt.Type("旅行")
+	tt.Key(0, ui.KeyEnter)
+	tt.Frame()
+	if g.dialogOpen || g.dialogMade != "旅行" || tt.HasText("新建相册") {
+		t.Fatalf("after typing a name and Enter: open %v, made %q", g.dialogOpen, g.dialogMade)
+	}
+	// A blank name makes nothing, and the dialog stays.
+	click(t, tt, "打开对话框")
+	tt.Frame()
+	click(t, tt, "建好")
+	if !g.dialogOpen || g.dialogMade != "旅行" {
+		t.Fatalf("after 建好 without a name: open %v, made %q", g.dialogOpen, g.dialogMade)
+	}
+	// What is behind the dialog takes no click through it.
+	before := g.clicks
+	if err := tt.Click("普通按钮"); err == nil && g.clicks != before {
+		t.Errorf("a button behind the dialog took a click")
+	}
+	g.dialogOpen = false
+	tt.Frame()
+	for name, leave := range map[string]func(){
+		"取消":              func() { click(t, tt, "取消") },
+		"Escape":          func() { tt.Key(0, ui.KeyEscape) },
+		"a click outside": func() { tt.ClickAt(8, 400) },
+	} {
+		click(t, tt, "打开对话框")
+		tt.Frame()
+		tt.Type("不要的")
+		leave()
+		tt.Frame()
+		if g.dialogOpen || g.dialogMade != "旅行" {
+			t.Fatalf("after leaving the dialog by %s: open %v, made %q", name, g.dialogOpen, g.dialogMade)
+		}
 	}
 }
 
