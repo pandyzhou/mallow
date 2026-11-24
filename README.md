@@ -22,7 +22,8 @@
 | 列表 | `ListRow` 可选中的列表行、`Plain` 无底按钮 |
 | 日期 | `Calendar` 月历，选一天 |
 | 导航 | `Sidebar` 侧边栏、`NavList` 导航列表（选中高亮块用弹簧动画滑动切换，类似 macOS）、`SourceList` 来源列表（紧凑、带图标和数量）、`ContextMenu` 右键菜单、`NavItem` 单个导航项 |
-| 浮层 | `Tooltip`、`Dialog` 对话框（盖在窗口上的卡片，背后的页面淡出，键盘留在卡片里，点外面或按 Esc 关闭） |
+| 浮层 | `Tooltip`、`Dialog` 对话框（盖在窗口上的卡片，背后的页面淡出，键盘留在卡片里，点外面或按 Esc 关闭）、`Popover` 弹出层（锚点下方的小卡片，用来从列表里选） |
+| 文本 | `Markdown`（按调色板显示 Markdown，支持边写边显示） |
 | 窗口 | `TitleBar` 自绘标题栏、`WindowButtons` 窗口按钮 |
 
 ## 使用

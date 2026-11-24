@@ -46,10 +46,16 @@ type gallery struct {
 	menuOpen   bool
 	menuChoice string
 
+	popOpen   bool   // the popover shows
+	popChoice string // what was chosen in it
+
 	dialogOpen bool
 	dialogName string // what is typed in the dialog
 	dialogMade string // what the dialog last made
 }
+
+// galleryMarkdown is what the gallery shows as Markdown.
+const galleryMarkdown = "## 今天的安排\n\n上午有 **两节课**，下午要交 `实验报告`。\n\n- 高等数学，A301\n- 大学英语，B102\n\n> 记得带学生证。"
 
 func newGallery() *gallery {
 	return &gallery{
@@ -252,6 +258,35 @@ func (g *gallery) sections(c *ui.Context) {
 					}
 					ui.Text(c, "建好的相册："+made).FontSize(12).TextColor(mallow.Muted)
 				})
+			})
+			section(c, "弹出层 Popover", func() {
+				ui.Row(c).Gap(16).AlignItems(ui.Center).Children(func() {
+					choice := g.popChoice
+					if choice == "" {
+						choice = "选一种水果"
+					}
+					anchor := mallow.Button(c, choice)
+					if anchor.Clicked() {
+						g.popOpen = !g.popOpen
+					}
+					mallow.Popover(c, anchor, &g.popOpen, func() {
+						for _, fruit := range []string{"苹果", "橘子", "葡萄"} {
+							item := mallow.Plain(c.Key(fruit), "选"+fruit).Padding(6, 12).MinWidth(120)
+							item.Children(func() { ui.Text(c, fruit).FontSize(13).TextColor(mallow.Text) })
+							if item.Clicked() {
+								g.popChoice, g.popOpen = fruit, false
+							}
+						}
+					})
+					ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
+						for _, glyph := range []func(*ui.Context, ui.Color){mallow.GlyphChevronDown, mallow.GlyphCopy, mallow.GlyphStop, mallow.GlyphHistory} {
+							glyph(c, mallow.Muted)
+						}
+					})
+				})
+			})
+			section(c, "Markdown", func() {
+				mallow.Markdown(c, galleryMarkdown, false)
 			})
 			section(c, "日历 Calendar", func() {
 				mallow.Calendar(c, "日期", &g.calMonth, &g.calDate, time.Now())

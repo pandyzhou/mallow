@@ -108,6 +108,38 @@ func drawn(c *ui.Context, draw func(p *ui.Painter, x, y float32)) {
 	ui.Box(c).Size(16, 16).Shrink(0).Draw(func(p *ui.Painter, r ui.Rect) { draw(p, r.X, r.Y) })
 }
 
+// GlyphChevronDown points down: what opens a list to choose from.
+func GlyphChevronDown(c *ui.Context, color ui.Color) {
+	drawn(c, func(p *ui.Painter, x, y float32) {
+		p.StrokePath(new(ui.Path).MoveTo(x+4.5, y+6.5).LineTo(x+8, y+10).LineTo(x+11.5, y+6.5), 1.4, color)
+	})
+}
+
+// GlyphCopy is two sheets, one behind the other: for copying.
+func GlyphCopy(c *ui.Context, color ui.Color) {
+	drawn(c, func(p *ui.Painter, x, y float32) {
+		sheets := new(ui.Path)
+		// The sheet in front, and what shows of the one behind it.
+		sheets.MoveTo(x+3, y+6).LineTo(x+10, y+6).LineTo(x+10, y+13.5).LineTo(x+3, y+13.5).Close()
+		sheets.MoveTo(x+6, y+3.8).LineTo(x+6, y+2.5).LineTo(x+13, y+2.5).LineTo(x+13, y+10).LineTo(x+12, y+10)
+		p.StrokePath(sheets, 1.3, color)
+	})
+}
+
+// GlyphStop is a filled square: for stopping what is under way.
+func GlyphStop(c *ui.Context, color ui.Color) {
+	ui.Box(c).Size(9, 9).Radius(2).Background(color)
+}
+
+// GlyphHistory is a clock: what was before, as earlier conversations.
+func GlyphHistory(c *ui.Context, color ui.Color) {
+	drawn(c, func(p *ui.Painter, x, y float32) {
+		clock := new(ui.Path).Circle(x+8, y+8, 5.6)
+		clock.MoveTo(x+8, y+4.8).LineTo(x+8, y+8).LineTo(x+10.3, y+9.4)
+		p.StrokePath(clock, 1.3, color)
+	})
+}
+
 // GlyphEdit is a pencil: for changing what is written, as a name.
 func GlyphEdit(c *ui.Context, color ui.Color) {
 	drawn(c, func(p *ui.Painter, x, y float32) {

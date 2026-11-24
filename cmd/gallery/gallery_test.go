@@ -30,7 +30,7 @@ func newTester(t *testing.T) (*gallery, *ui.Tester) {
 	g := newGallery()
 	g.win = &fakeWindow{}
 	// Tall enough to show every section, so that tests can click them.
-	return g, ui.NewTester(g.view, 1180, 1700)
+	return g, ui.NewTester(g.view, 1180, 2100)
 }
 
 func click(t *testing.T, tt *ui.Tester, label string) {
@@ -388,5 +388,48 @@ func frames(t *testing.T, name string, labels ...string) {
 		}
 		png.Encode(f, tt.Image())
 		f.Close()
+	}
+}
+
+// A popover shows under its anchor when asked for, takes a choice, and
+// goes when a press lands outside it.
+func TestPopover(t *testing.T) {
+	g, tt := newTester(t)
+	if tt.HasText("橘子") {
+		t.Fatal("the popover shows before it is asked for")
+	}
+	click(t, tt, "选一种水果")
+	tt.Frame()
+	if !g.popOpen || !tt.HasText("橘子") {
+		t.Fatalf("no popover after a click on its anchor: %q", tt.Texts())
+	}
+	click(t, tt, "选橘子")
+	tt.Frame()
+	if g.popOpen || g.popChoice != "橘子" || tt.HasText("苹果") {
+		t.Fatalf("after choosing: open %v, choice %q", g.popOpen, g.popChoice)
+	}
+	click(t, tt, "橘子")
+	tt.Frame()
+	tt.Key(0, ui.KeyEscape)
+	tt.Frame()
+	if g.popOpen || g.popChoice != "橘子" {
+		t.Fatalf("after Escape: open %v, choice %q", g.popOpen, g.popChoice)
+	}
+}
+
+// Markdown shows its text as it reads, without the marks it is written
+// with.
+func TestMarkdown(t *testing.T) {
+	_, tt := newTester(t)
+	texts := strings.Join(tt.Texts(), "\n")
+	for _, want := range []string{"今天的安排", "两节课", "高等数学，A301", "记得带学生证"} {
+		if !strings.Contains(texts, want) {
+			t.Errorf("the Markdown does not show %q: %q", want, tt.Texts())
+		}
+	}
+	for _, mark := range []string{"## ", "**", "`实验报告`"} {
+		if strings.Contains(texts, mark) {
+			t.Errorf("the Markdown shows its mark %q: %q", mark, tt.Texts())
+		}
 	}
 }
