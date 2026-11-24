@@ -141,17 +141,21 @@ func sourceEntry(c *ui.Context, it Item, chosen bool) ui.Element {
 	item := ui.ButtonBase(c).Role(ui.RoleTab).Label(it.Label).AccessSelected(chosen).
 		Height(sourceItemHeight).PaddingX(12).Gap(10).Radius(RadiusSmall).
 		Justify(ui.Start).AlignItems(ui.Center).Cursor(ui.CursorPointer)
-	color := Muted
+	// The labels are of the text's colour, not of a heading's: muted, an
+	// entry reads as one more caption, not as something to click. Under
+	// the pointer it stands out of the surface, as a button.
+	color, glyph := Text, Muted
 	switch {
 	case chosen:
-		color = Accent
+		color, glyph = Accent, Accent
 	case item.Hovered():
-		color = Text
+		glyph = Text
+		Soft(Raised(item, Tiny))
 	}
 	return item.Children(func() {
 		if it.Glyph != nil {
 			ui.Row(c).Size(16, 16).Shrink(0).Justify(ui.Center).AlignItems(ui.Center).Children(func() {
-				it.Glyph(c, color)
+				it.Glyph(c, glyph)
 			})
 		}
 		text := ui.Text(c, it.Label).Grow(1).MinWidth(0).FontSize(14).TextColor(color).SingleLine()
