@@ -31,7 +31,7 @@ func newTester(t *testing.T) (*gallery, *ui.Tester) {
 	g := newGallery()
 	g.win = &fakeWindow{}
 	// Tall enough to show every section, so that tests can click them.
-	return g, ui.NewTester(g.view, 1180, 2420)
+	return g, ui.NewTester(g.view, 1180, 2500)
 }
 
 func click(t *testing.T, tt *ui.Tester, label string) {
@@ -450,5 +450,21 @@ func TestTinted(t *testing.T) {
 	}
 	if len(seen) != len(mallow.Hues) {
 		t.Errorf("%d hues show as %d colors", len(mallow.Hues), len(seen))
+	}
+}
+
+// TestDocument checks that a Document shows its Markdown and gives the app
+// the links clicked in it, as they are written.
+func TestDocument(t *testing.T) {
+	g, tt := newTester(t)
+	if !tt.HasText("来自别处的文档：") || tt.HasText("](docs/guide.md)") {
+		t.Fatalf("the document shows as %q", tt.Texts())
+	}
+	if err := tt.Click("打开说明"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if g.docLink != "docs/guide.md" || !tt.HasText("点了链接：docs/guide.md") {
+		t.Errorf("after a click on the link: %q, %q", g.docLink, tt.Texts())
 	}
 }

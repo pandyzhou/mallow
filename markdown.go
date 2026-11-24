@@ -22,6 +22,38 @@ var (
 // and what is added to it comes in smoothly; show it without streaming,
 // in the same place, once it is whole. Its text can be selected.
 func Markdown(c *ui.Context, src string, streaming bool) ui.Element {
+	theme()
+	if streaming {
+		return markdown.Stream(c, src, &markdownOptions)
+	}
+	return markdown.View(c, src, &markdownOptions)
+}
+
+// Document shows Markdown that came from elsewhere, as a project's README:
+// as Markdown does, with its pictures and with its links the app's to
+// follow. Keep one for what is shown in a place: it holds the pictures
+// loaded.
+type Document struct {
+	// LoadImage loads the picture at an address, on a goroutine of its
+	// own; until it has, and when it fails, the picture shows as its
+	// description. Without it every picture does.
+	LoadImage func(url string) (ui.ImageSource, error)
+	// OnLink follows a link, given its address as it is written. Without
+	// it links to the web open in the browser.
+	OnLink  func(url string)
+	options markdown.Options
+}
+
+// View shows src, the document's text.
+func (d *Document) View(c *ui.Context, src string) ui.Element {
+	theme()
+	d.options.Theme, d.options.LoadImage, d.options.OnLink = markdownOptions.Theme, d.LoadImage, d.OnLink
+	return markdown.View(c, src, &d.options)
+}
+
+// theme makes the look of every Markdown anew when the palette, the font
+// or the line height changed.
+func theme() {
 	lines := LineHeight
 	if lines == 0 {
 		lines = 1.5
@@ -50,8 +82,4 @@ func Markdown(c *ui.Context, src string, streaming bool) ui.Element {
 			Checkbox:            Accent,
 		}
 	}
-	if streaming {
-		return markdown.Stream(c, src, &markdownOptions)
-	}
-	return markdown.View(c, src, &markdownOptions)
 }

@@ -23,6 +23,9 @@ import (
 type gallery struct {
 	win mallow.Window
 
+	doc     mallow.Document // the Markdown from elsewhere
+	docLink string          // the link of it that was clicked
+
 	mode    string
 	style   string
 	nav     string
@@ -288,6 +291,12 @@ func (g *gallery) sections(c *ui.Context) {
 			})
 			section(c, "Markdown", func() {
 				mallow.Markdown(c, galleryMarkdown, false)
+				// A Document follows its links as the app says.
+				g.doc.OnLink = func(url string) { g.docLink = url }
+				g.doc.View(c, "来自别处的文档：[打开说明](docs/guide.md)")
+				if g.docLink != "" {
+					ui.Text(c, "点了链接："+g.docLink).FontSize(12).TextColor(mallow.Muted)
+				}
 			})
 			section(c, "日历 Calendar", func() {
 				mallow.Calendar(c, "日期", &g.calMonth, &g.calDate, time.Now())
