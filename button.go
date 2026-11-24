@@ -73,11 +73,16 @@ type IconButtonStyle struct {
 	// Active shows the glyph in the accent, for a button that is on, as a
 	// toggle whose setting is set.
 	Active bool
+	// Primary fills an IconButton with the accent, for the one action a
+	// view leads to, as sending what was written.
+	Primary bool
 }
 
 // glyphColor is the color of an icon button's glyph.
 func glyphColor(b ui.Element, style IconButtonStyle, pressed bool) ui.Color {
 	switch {
+	case style.Primary:
+		return OnAccent
 	case b.Hovered() && !pressed && style.Danger:
 		return Danger
 	case style.Active:
@@ -103,6 +108,15 @@ func IconButton(c *ui.Context, label string, glyph Glyph, style IconButtonStyle)
 		d = Small
 	}
 	press(b, d)
+	if style.Primary {
+		b.Background(Accent)
+		if look == Organic {
+			b.Border(1, ui.Transparent)
+			if b.Hovered() {
+				b.Background(Accent.Mix(Base, 0.12))
+			}
+		}
+	}
 	Tooltip(c, b, label)
 	b.Children(func() { glyph(c, color) })
 	return b

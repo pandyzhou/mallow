@@ -163,6 +163,7 @@ func (g *gallery) sections(c *ui.Context) {
 					mallow.IconButton(c, "上一个", mallow.GlyphChevronLeft, mallow.IconButtonStyle{Size: 36})
 					mallow.IconButton(c, "添加", mallow.GlyphPlus, mallow.IconButtonStyle{Size: 36})
 					mallow.IconButton(c, "删除", mallow.GlyphClose, mallow.IconButtonStyle{Size: 36, Danger: true})
+					mallow.IconButton(c, "发送", mallow.GlyphArrowUp, mallow.IconButtonStyle{Size: 36, Primary: true})
 				})
 				ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
 					mallow.Label(c, "无底图标按钮")
@@ -279,7 +280,7 @@ func (g *gallery) sections(c *ui.Context) {
 						}
 					})
 					ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
-						for _, glyph := range []func(*ui.Context, ui.Color){mallow.GlyphChevronDown, mallow.GlyphCopy, mallow.GlyphStop, mallow.GlyphHistory, mallow.GlyphAttach, mallow.GlyphFile} {
+						for _, glyph := range []func(*ui.Context, ui.Color){mallow.GlyphChevronDown, mallow.GlyphCopy, mallow.GlyphStop, mallow.GlyphHistory, mallow.GlyphAttach, mallow.GlyphFile, mallow.GlyphArrowUp, mallow.GlyphCompose} {
 							glyph(c, mallow.Muted)
 						}
 					})

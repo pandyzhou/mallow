@@ -162,6 +162,25 @@ func GlyphFile(c *ui.Context, color ui.Color) {
 	})
 }
 
+// GlyphArrowUp is an arrow pointing up: for sending what was written.
+func GlyphArrowUp(c *ui.Context, color ui.Color) {
+	drawn(c, func(p *ui.Painter, x, y float32) {
+		arrow := new(ui.Path).MoveTo(x+8, y+13).LineTo(x+8, y+3.5)
+		arrow.MoveTo(x+3.8, y+7.6).LineTo(x+8, y+3.4).LineTo(x+12.2, y+7.6)
+		p.StrokePath(arrow, 1.6, color)
+	})
+}
+
+// GlyphCompose is a sheet with a pencil over its corner: for beginning
+// something new to write, as a conversation.
+func GlyphCompose(c *ui.Context, color ui.Color) {
+	drawn(c, func(p *ui.Painter, x, y float32) {
+		sheet := new(ui.Path).MoveTo(x+7.5, y+3).LineTo(x+3, y+3).LineTo(x+3, y+13).LineTo(x+13, y+13).LineTo(x+13, y+8.5)
+		sheet.MoveTo(x+6.6, y+9.4).LineTo(x+7.2, y+7.2).LineTo(x+11.9, y+2.5).LineTo(x+13.5, y+4.1).LineTo(x+8.8, y+8.8).Close()
+		p.StrokePath(sheet, 1.3, color)
+	})
+}
+
 // GlyphEdit is a pencil: for changing what is written, as a name.
 func GlyphEdit(c *ui.Context, color ui.Color) {
 	drawn(c, func(p *ui.Painter, x, y float32) {
