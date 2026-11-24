@@ -143,14 +143,19 @@ func sourceEntry(c *ui.Context, it Item, chosen bool) ui.Element {
 		Justify(ui.Start).AlignItems(ui.Center).Cursor(ui.CursorPointer)
 	// The labels are of the text's colour, not of a heading's: muted, an
 	// entry reads as one more caption, not as something to click. Under
-	// the pointer it stands out of the surface, as a button.
+	// the pointer it sinks a little, the way the one chosen has sunk:
+	// standing out there, beside one sunk in, it read as the opposite.
 	color, glyph := Text, Muted
 	switch {
 	case chosen:
 		color, glyph = Accent, Accent
 	case item.Hovered():
 		glyph = Text
-		Soft(Raised(item, Tiny))
+		if look == Organic {
+			Soft(item.Background(Hover))
+		} else {
+			Soft(Recessed(item, 1))
+		}
 	}
 	return item.Children(func() {
 		if it.Glyph != nil {
