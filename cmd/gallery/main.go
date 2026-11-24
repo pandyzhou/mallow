@@ -279,7 +279,7 @@ func (g *gallery) sections(c *ui.Context) {
 						}
 					})
 					ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
-						for _, glyph := range []func(*ui.Context, ui.Color){mallow.GlyphChevronDown, mallow.GlyphCopy, mallow.GlyphStop, mallow.GlyphHistory} {
+						for _, glyph := range []func(*ui.Context, ui.Color){mallow.GlyphChevronDown, mallow.GlyphCopy, mallow.GlyphStop, mallow.GlyphHistory, mallow.GlyphAttach, mallow.GlyphFile} {
 							glyph(c, mallow.Muted)
 						}
 					})

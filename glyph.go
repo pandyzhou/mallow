@@ -140,6 +140,28 @@ func GlyphHistory(c *ui.Context, color ui.Color) {
 	})
 }
 
+// GlyphAttach is a paper clip: for attaching files to what is written.
+func GlyphAttach(c *ui.Context, color ui.Color) {
+	drawn(c, func(p *ui.Painter, x, y float32) {
+		// From the end of the outer wire, round the bottom, up and round
+		// the top, and down into the turn in the middle.
+		clip := new(ui.Path).MoveTo(x+11, y+5).LineTo(x+11, y+11).CubeTo(x+11, y+15, x+5, y+15, x+5, y+11).
+			LineTo(x+5, y+4.5).CubeTo(x+5, y+1.8, x+9, y+1.8, x+9, y+4.5).
+			LineTo(x+9, y+10.5).CubeTo(x+9, y+11.9, x+7, y+11.9, x+7, y+10.5).LineTo(x+7, y+5)
+		p.StrokePath(clip, 1.3, color)
+	})
+}
+
+// GlyphFile is a sheet with its corner folded: a file.
+func GlyphFile(c *ui.Context, color ui.Color) {
+	drawn(c, func(p *ui.Painter, x, y float32) {
+		sheet := new(ui.Path).MoveTo(x+4, y+2.5).LineTo(x+9.5, y+2.5).LineTo(x+12.5, y+5.5).
+			LineTo(x+12.5, y+13.5).LineTo(x+4, y+13.5).Close()
+		sheet.MoveTo(x+9.5, y+2.5).LineTo(x+9.5, y+5.5).LineTo(x+12.5, y+5.5)
+		p.StrokePath(sheet, 1.3, color)
+	})
+}
+
 // GlyphEdit is a pencil: for changing what is written, as a name.
 func GlyphEdit(c *ui.Context, color ui.Color) {
 	drawn(c, func(p *ui.Painter, x, y float32) {
