@@ -17,18 +17,16 @@ func NavItem(c *ui.Context, label string, chosen bool) ui.Element {
 	return Soft(item)
 }
 
-// navEntry is an entry of a navigation list without a surface: its text, in
-// the accent while chosen and darker while hovered.
+// navEntry is an entry of a navigation list without a surface: its text, of
+// the text's color, as what is there to click, and in the accent while
+// chosen.
 func navEntry(c *ui.Context, label string, chosen bool) ui.Element {
 	item := ui.ButtonBase(c).Role(ui.RoleTab).Label(label).AccessSelected(chosen).
 		Height(navItemHeight).PaddingX(16).Radius(RadiusControl).Justify(ui.Center).
 		Cursor(ui.CursorPointer)
-	color := Muted
-	switch {
-	case chosen:
+	color := Text
+	if chosen {
 		color = Accent
-	case item.Hovered():
-		color = Text
 	}
 	return item.Children(func() {
 		text := ui.Text(c, label).FontSize(14).TextColor(color).SingleLine()
@@ -58,7 +56,7 @@ const (
 // NavList is a column of entries choosing one into *selected, as macOS's
 // source lists: one recess marks the chosen entry and, when the choice
 // changes, slides over to the new one (Slide). The entries not chosen are
-// raised a little, as buttons. It reports whether the
+// level with the surface, and sink a little under the pointer. It reports whether the
 // choice changed.
 func NavList(c *ui.Context, label string, selected *string, items []Item) bool {
 	idx := -1
@@ -81,15 +79,16 @@ func NavList(c *ui.Context, label string, selected *string, items []Item) bool {
 		}
 		for i, it := range items {
 			entry := navEntry(c.Key(it.ID), it.Label, i == idx)
-			// Those not chosen stand out of the surface a little, more
-			// under the pointer: flat text does not look like something
-			// to click, least of all when it is the only entry.
-			switch {
-			case i == idx:
-			case entry.Hovered():
-				Soft(Raised(entry, Small))
-			default:
-				Soft(Raised(entry, Tiny))
+			// Those not chosen are level with the surface, and sink a
+			// little under the pointer, the way the one chosen has sunk:
+			// standing out, beside one sunk in, they read as its opposite,
+			// and an entry went from the one to the other when chosen.
+			if i != idx && entry.Hovered() {
+				if look == Organic {
+					Soft(entry.Background(Hover))
+				} else {
+					Soft(Recessed(entry, 1))
+				}
 			}
 			if entry.Clicked() && i != idx {
 				*selected, changed = it.ID, true
