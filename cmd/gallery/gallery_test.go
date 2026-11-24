@@ -468,3 +468,41 @@ func TestDocument(t *testing.T) {
 		t.Errorf("after a click on the link: %q, %q", g.docLink, tt.Texts())
 	}
 }
+
+// TestLightbox checks that a picture of a Document shows large on a click,
+// larger than it is in the text and within the window, and that a click
+// on it shuts it.
+func TestLightbox(t *testing.T) {
+	_, tt := newTester(t)
+	// The picture loads on a goroutine of its own.
+	var small ui.Rect
+	for range 200 {
+		tt.Frame()
+		if r, ok := tt.Find("看大图：示意图"); ok {
+			small = r
+			break
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	if small.W == 0 {
+		t.Fatalf("the picture does not show: %q", tt.Texts())
+	}
+	if _, ok := tt.Find("关闭大图"); ok {
+		t.Fatal("the picture shows large before it is clicked")
+	}
+	if err := tt.Click("看大图：示意图"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Advance(time.Second)
+	large, ok := tt.Find("关闭大图")
+	if !ok || large.W <= small.W*1.5 || large.W > 1180 || large.H > 2500 {
+		t.Fatalf("the picture shown large is %v, and %v in the text", large, small)
+	}
+	if err := tt.Click("关闭大图"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Advance(time.Second)
+	if _, ok := tt.Find("关闭大图"); ok {
+		t.Errorf("the picture still shows large after a click on it")
+	}
+}

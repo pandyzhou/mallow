@@ -9,6 +9,8 @@ package main
 
 import (
 	"fmt"
+	"image"
+	"image/color"
 	"log"
 	"runtime"
 	"strings"
@@ -55,6 +57,18 @@ type gallery struct {
 	dialogOpen bool
 	dialogName string // what is typed in the dialog
 	dialogMade string // what the dialog last made
+}
+
+// galleryPicture is a picture for the gallery's Document: bands of the hues.
+func galleryPicture() ui.ImageSource {
+	img := image.NewRGBA(image.Rect(0, 0, 160, 60))
+	for y := range 60 {
+		for x := range 160 {
+			hue := mallow.Hues[x*len(mallow.Hues)/160]
+			img.SetRGBA(x, y, color.RGBA{hue.R, hue.G, hue.B, 255})
+		}
+	}
+	return ui.NewBitmap(img)
 }
 
 // galleryMarkdown is what the gallery shows as Markdown.
@@ -293,7 +307,10 @@ func (g *gallery) sections(c *ui.Context) {
 				mallow.Markdown(c, galleryMarkdown, false)
 				// A Document follows its links as the app says.
 				g.doc.OnLink = func(url string) { g.docLink = url }
-				g.doc.View(c, "来自别处的文档：[打开说明](docs/guide.md)")
+				// Its pictures load as the app says, and show large on a
+				// click, in a Lightbox.
+				g.doc.LoadImage = func(string) (ui.ImageSource, error) { return galleryPicture(), nil }
+				g.doc.View(c, "来自别处的文档：[打开说明](docs/guide.md)\n\n![示意图](picture.png)")
 				if g.docLink != "" {
 					ui.Text(c, "点了链接："+g.docLink).FontSize(12).TextColor(mallow.Muted)
 				}

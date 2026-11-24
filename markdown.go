@@ -1,6 +1,8 @@
 package mallow
 
 import (
+	"sync"
+
 	"github.com/egoist/mygo/ui"
 	"github.com/egoist/mygo/ui/markdown"
 )
@@ -42,13 +44,33 @@ type Document struct {
 	// it links to the web open in the browser.
 	OnLink  func(url string)
 	options markdown.Options
+
+	mu     sync.Mutex
+	loaded map[string]*picture // its pictures, by their addresses
+	// showing is the text of the View being built; zoomed is whether a
+	// picture shows large, zoom that picture, zoomLabel what it is, and
+	// zoomIn the text of the View it is of, which builds the Lightbox.
+	showing   string
+	zoomed    bool
+	zoom      ui.ImageSource
+	zoomLabel string
+	zoomIn    string
 }
 
-// View shows src, the document's text.
+// View shows src, the document's text. A click on one of its pictures
+// shows it large, in a Lightbox.
 func (d *Document) View(c *ui.Context, src string) ui.Element {
 	theme()
-	d.options.Theme, d.options.LoadImage, d.options.OnLink = markdownOptions.Theme, d.LoadImage, d.OnLink
-	return markdown.View(c, src, &d.options)
+	d.options.Theme, d.options.OnLink = markdownOptions.Theme, d.OnLink
+	if d.options.Block == nil {
+		d.options.Block = d.pictures
+	}
+	d.showing = src
+	e := markdown.View(c, src, &d.options)
+	if d.zoomed && d.zoomIn == src {
+		Lightbox(c, &d.zoomed, d.zoom, d.zoomLabel)
+	}
+	return e
 }
 
 // theme makes the look of every Markdown anew when the palette, the font
