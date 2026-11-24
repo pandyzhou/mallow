@@ -235,6 +235,24 @@ func UseMode(c *ui.Context, mode Mode) {
 // strikethrough in MyGo, so a font with CJK glyphs comes first.
 var Font = "Microsoft YaHei UI"
 
+// LineHeight is the height of a line of text, as a multiple of its size, in
+// what mallow shows over the window: dialogs, menus and tooltips, whose
+// text inherits nothing from the window's content. 0 leaves it to the font.
+// Each font has its own, so an app that lets the font be chosen sets one,
+// here and with Element.LineHeight on the root of its content: choosing
+// another font then moves nothing. A line is never lower than its font's
+// ascent and descent, so set more than the tallest font's.
+var LineHeight float32
+
+// over gives the panel of what shows over the window the text settings
+// that its content would inherit in the window's.
+func over(panel ui.Element) ui.Element {
+	if LineHeight > 0 {
+		panel.LineHeight(LineHeight)
+	}
+	return panel
+}
+
 // Theme returns the window theme for the palette in use. Mallow's components
 // take their colors from the palette, not from it; it colors what the bases
 // and the window draw on their own: the window background, text defaults,

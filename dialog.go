@@ -33,7 +33,7 @@ func Dialog(c *ui.Context, open *bool, o DialogOptions, body func()) ui.Element 
 			width = 440
 		}
 		w, h := c.Size()
-		panel.Label(o.Title).Width(width).MaxWidth(w - 2*dialogMargin).MaxHeight(h - 2*dialogMargin).
+		over(panel).Label(o.Title).Width(width).MaxWidth(w - 2*dialogMargin).MaxHeight(h - 2*dialogMargin).
 			Padding(24).Gap(16).Radius(RadiusCard)
 		if look == Organic {
 			// A card over the veil, with a line around it and the shadow

@@ -20,7 +20,7 @@ func ContextMenu(c *ui.Context, target ui.Element, open *bool, entries []MenuEnt
 	chosen := ""
 	m := ui.ContextMenuBase(c, target, open)
 	m.Popup(func(panel ui.Element) {
-		panel.Margin(4).Padding(6).Gap(2).MinWidth(148).Radius(RadiusSmall + 4)
+		over(panel).Margin(4).Padding(6).Gap(2).MinWidth(148).Radius(RadiusSmall + 4)
 		Raised(panel, Medium)
 		for _, en := range entries {
 			item := m.Item()

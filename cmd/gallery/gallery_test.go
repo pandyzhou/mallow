@@ -270,6 +270,30 @@ func TestDialog(t *testing.T) {
 	}
 }
 
+// What shows over the window sets its lines as high as LineHeight says:
+// its text inherits nothing from the window's content.
+func TestLineHeightOver(t *testing.T) {
+	defer func() { mallow.LineHeight = 0 }()
+	g, tt := newTester(t)
+	// The dialog's card, which its title names, is as high as its lines
+	// make it: a title of 18 px, a field and a row of buttons of 14 px.
+	height := func(lines float32) float32 {
+		mallow.LineHeight = lines
+		g.dialogOpen = true
+		tt.Frame()
+		card, ok := tt.Find("新建相册")
+		if !ok {
+			t.Fatalf("no dialog: %q", tt.Texts())
+		}
+		g.dialogOpen = false
+		tt.Frame()
+		return card.H
+	}
+	if two, three := height(2), height(3); three-two != 18+14+14 {
+		t.Errorf("the dialog is %v high with lines twice their size, %v with lines three times: not 46 more", two, three)
+	}
+}
+
 // A source list's entries choose, and show their notes.
 func TestSourceList(t *testing.T) {
 	g, tt := newTester(t)
