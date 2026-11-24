@@ -312,6 +312,12 @@ func (g *gallery) sections(c *ui.Context) {
 						})
 					}
 				})
+				// Tray is a well for large areas: its shadows go around its
+				// corners as Recessed's do.
+				mallow.Tray(c, mallow.Small).Padding(16, 20).Children(func() {
+					ui.Text(c, "凹槽 Tray").FontSize(13).TextColor(mallow.Muted)
+					ui.Box(c).Height(40)
+				})
 				// Tinted tells things of a kind apart by their hues.
 				ui.Row(c).Gap(10).Wrap().Children(func() {
 					for i, hue := range mallow.Hues {

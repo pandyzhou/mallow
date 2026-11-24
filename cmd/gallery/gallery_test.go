@@ -31,7 +31,7 @@ func newTester(t *testing.T) (*gallery, *ui.Tester) {
 	g := newGallery()
 	g.win = &fakeWindow{}
 	// Tall enough to show every section, so that tests can click them.
-	return g, ui.NewTester(g.view, 1180, 2300)
+	return g, ui.NewTester(g.view, 1180, 2420)
 }
 
 func click(t *testing.T, tt *ui.Tester, label string) {

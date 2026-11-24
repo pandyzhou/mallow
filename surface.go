@@ -92,10 +92,21 @@ func Card(c *ui.Context, d Depth) ui.Element {
 	return Raised(ui.Column(c).Radius(RadiusCard), d)
 }
 
+// wideWell is the area, in DIPs, from which a Tray is too large for inner
+// shadows: about a third of a small window.
+const wideWell = 240_000
+
 // Tray is a recessed column: a well that sets what it holds apart from what
-// is around it, as raised cards rising out of it.
+// is around it, as raised cards rising out of it. One of a field's size
+// sinks as Recessed has it, its shadows going around its corners; a larger
+// one, as it was laid out last, as RecessedWide does, whose shadows thin
+// out at the corners and cost far less over a large area.
 func Tray(c *ui.Context, d Depth) ui.Element {
-	return RecessedWide(ui.Column(c), d, RadiusCard+8)
+	e := ui.Column(c)
+	if b := e.Bounds(); look == Organic || b.W*b.H > wideWell {
+		return RecessedWide(e, d, RadiusCard+8)
+	}
+	return Recessed(e, d).Radius(RadiusCard + 8)
 }
 
 // Groove is a divider pressed into the surface: a thin channel, the way soft
