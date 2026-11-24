@@ -66,7 +66,11 @@ func NavList(c *ui.Context, label string, selected *string, items []Item) bool {
 		}
 	}
 	changed := false
-	ui.Column(c).Role(ui.RoleTabList).Label(label).Gap(navItemGap).Children(func() {
+	list := ui.Column(c).Role(ui.RoleTabList).Label(label).Gap(navItemGap)
+	// The entry chosen comes into view when another is: in a list that
+	// scrolls, as a sidebar's in a low window, it may be out of it.
+	shown := ui.Local(list, "shown", func() string { return *selected })
+	list.Children(func() {
 		// The recess paints under the entries (ZIndex -1: absolute elements
 		// paint over the flow otherwise) and is keyed, so that its position
 		// animates from frame to frame.
@@ -79,6 +83,10 @@ func NavList(c *ui.Context, label string, selected *string, items []Item) bool {
 		}
 		for i, it := range items {
 			entry := navEntry(c.Key(it.ID), it.Label, i == idx)
+			if i == idx && *shown != it.ID {
+				*shown = it.ID
+				entry.ScrollIntoView()
+			}
 			// Those not chosen are level with the surface, and sink a
 			// little under the pointer, the way the one chosen has sunk:
 			// standing out, beside one sunk in, they read as its opposite,
@@ -210,7 +218,9 @@ func Sidebar(c *ui.Context, o SidebarOptions) bool {
 			})
 			Groove(c).MarginX(4)
 		}
-		ui.Column(c).Grow(1).MinHeight(0).Children(func() {
+		// More entries than the window has room for scroll, over what is
+		// at the foot, which stays where it is.
+		ui.Scroll(c).Label(o.Title + "导航列表").Grow(1).MinHeight(0).Children(func() {
 			changed = NavList(c, o.Title+"导航", o.Selected, o.Items)
 		})
 		if len(o.Bottom) > 0 {
