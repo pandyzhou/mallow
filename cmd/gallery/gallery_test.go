@@ -193,6 +193,13 @@ func TestScreenshot(t *testing.T) {
 			click(t, tt, label)
 		}
 	}
+	// MALLOW_SCREENSHOT_RIGHTCLICK opens the context menu of a label.
+	if s := os.Getenv("MALLOW_SCREENSHOT_RIGHTCLICK"); s != "" {
+		if err := tt.RightClick(s); err != nil {
+			t.Fatal(err)
+		}
+		tt.Frame()
+	}
 	tt.Advance(time.Second)
 	f, err := os.Create(path)
 	if err != nil {
@@ -218,6 +225,28 @@ func TestContextMenu(t *testing.T) {
 	tt.Frame()
 	if g.menuChoice != "删除" || g.menuOpen {
 		t.Errorf("choice %q, open %v after choosing 删掉它", g.menuChoice, g.menuOpen)
+	}
+	// The entry before the line is chosen as those after it, and the keys
+	// step over the line: Down from the first entry is on the second.
+	if err := tt.RightClick("在这里点右键"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	click(t, tt, "再来一个")
+	tt.Frame()
+	if g.menuChoice != "新建" || g.menuOpen {
+		t.Errorf("choice %q, open %v after choosing 再来一个", g.menuChoice, g.menuOpen)
+	}
+	if err := tt.RightClick("在这里点右键"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	tt.Key(0, ui.KeyDown)
+	tt.Key(0, ui.KeyDown)
+	tt.Key(0, ui.KeyEnter)
+	tt.Frame()
+	if g.menuChoice != "改名" || g.menuOpen {
+		t.Errorf("choice %q, open %v after Down, Down, Enter", g.menuChoice, g.menuOpen)
 	}
 }
 

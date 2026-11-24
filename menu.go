@@ -2,7 +2,8 @@ package mallow
 
 import "github.com/egoist/mygo/ui"
 
-// MenuEntry is an item of a ContextMenu.
+// MenuEntry is an item of a ContextMenu, or, with neither an ID nor a
+// Label, a line between two groups of its items.
 type MenuEntry struct {
 	ID, Label string
 	// Glyph is drawn before the label; nil leaves its place empty.
@@ -23,6 +24,10 @@ func ContextMenu(c *ui.Context, target ui.Element, open *bool, entries []MenuEnt
 		over(panel).Margin(4).Padding(6).Gap(2).MinWidth(148).Radius(RadiusSmall + 4)
 		Raised(panel, Medium)
 		for _, en := range entries {
+			if en.ID == "" && en.Label == "" {
+				Groove(c).Margin(3, 8)
+				continue
+			}
 			item := m.Item()
 			item.Label(en.Label).Height(34).PaddingX(10).Gap(10).Radius(RadiusSmall).
 				AlignItems(ui.Center).Cursor(ui.CursorPointer)

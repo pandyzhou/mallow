@@ -208,9 +208,13 @@ func (g *gallery) sections(c *ui.Context) {
 			section(c, "右键菜单 ContextMenu", func() {
 				target := mallow.Button(c, "在这里点右键")
 				switch mallow.ContextMenu(c, target, &g.menuOpen, []mallow.MenuEntry{
+					{ID: "new", Label: "再来一个", Glyph: mallow.GlyphPlus},
+					{}, // a line: what follows is about this one
 					{ID: "rename", Label: "改个名字", Glyph: mallow.GlyphEdit},
 					{ID: "delete", Label: "删掉它", Glyph: mallow.GlyphTrash, Danger: true},
 				}) {
+				case "new":
+					g.menuChoice = "新建"
 				case "rename":
 					g.menuChoice = "改名"
 				case "delete":
