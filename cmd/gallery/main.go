@@ -311,6 +311,14 @@ func (g *gallery) sections(c *ui.Context) {
 				// click, in a Lightbox; one that is a link follows it, but
 				// shows large where the link goes to a heading of the page.
 				g.doc.LoadImage = func(string) (ui.ImageSource, error) { return galleryPicture(), nil }
+				// They show at the size the app gives them, as a README says:
+				// the badge half as wide as it is, keeping its shape.
+				g.doc.Size = func(url string) (float32, float32) {
+					if url == "badge.png" {
+						return 80, 0
+					}
+					return 0, 0
+				}
 				g.doc.View(c, "来自别处的文档：[打开说明](docs/guide.md)\n\n"+
 					"![示意图](picture.png) [![徽章](badge.png)](https://example.com/badge) [![标题图](heading.png)](#top)")
 				if g.docLink != "" {

@@ -497,6 +497,31 @@ func TestDocumentLinkedPictures(t *testing.T) {
 	}
 }
 
+// TestDocumentPictureSize checks that a picture shows at the size the app
+// gives it, keeping its shape where only one side is given, and the others
+// at their own; shown large, it is at its own size again.
+func TestDocumentPictureSize(t *testing.T) {
+	_, tt := newTester(t)
+	var badge, picture ui.Rect
+	for range 200 {
+		tt.Frame()
+		b, ok1 := tt.Find("打开链接：徽章")
+		p, ok2 := tt.Find("看大图：示意图")
+		if ok1 && ok2 {
+			badge, picture = b, p
+			break
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	// galleryPicture is 160 by 60.
+	if badge.W < 79 || badge.W > 81 || badge.H < 29 || badge.H > 31 {
+		t.Errorf("the badge, to show 80 wide, is %v", badge)
+	}
+	if picture.W < 159 || picture.W > 161 || picture.H < 59 || picture.H > 61 {
+		t.Errorf("the picture of no given size is %v", picture)
+	}
+}
+
 // TestLightbox checks that a picture of a Document shows large on a click,
 // larger than it is in the text and within the window, and that a click
 // on it shuts it.

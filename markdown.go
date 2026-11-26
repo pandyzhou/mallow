@@ -42,7 +42,14 @@ type Document struct {
 	LoadImage func(url string) (ui.ImageSource, error)
 	// OnLink follows a link, given its address as it is written. Without
 	// it links to the web open in the browser.
-	OnLink  func(url string)
+	OnLink func(url string)
+	// Size gives the size in DIPs a picture is to show at, from its
+	// address, as a README says how large its pictures show: 0 for a side
+	// left open, which keeps the picture's shape. Without it, or for 0 by
+	// 0, a picture shows at its own size. Either way it is drawn from all
+	// its pixels, sharp where the screen has more of them than the size
+	// counts, and it is never wider than the view.
+	Size    func(url string) (w, h float32)
 	options markdown.Options
 
 	mu     sync.Mutex

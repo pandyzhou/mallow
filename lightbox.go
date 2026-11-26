@@ -134,7 +134,10 @@ func (d *Document) pictures(c *ui.Context, doc *parser.Document, i int) bool {
 			b := ui.ButtonBase(c.Key(k)).Label(label).Cursor(ui.CursorPointer).Radius(em * 0.3).Clip().MaxWidthPercent(100).Shrink(1)
 			b.Children(func() {
 				img := ui.Image(c, src).MaxWidthPercent(100)
-				if w, h := ui.ImageSize(src); w > 0 && h > 0 {
+				w, h := ui.ImageSize(src)
+				if sw, sh := d.size(in[k].Dest, w, h); sw > 0 {
+					img.Width(sw).AspectRatio(sw / sh)
+				} else if w > 0 && h > 0 {
 					img.AspectRatio(w / h)
 				}
 			})
@@ -151,6 +154,24 @@ func (d *Document) pictures(c *ui.Context, doc *parser.Document, i int) bool {
 		}
 	})
 	return true
+}
+
+// size is the size a picture of w by h DIPs of its own shows at, as Size
+// says for its address: 0 by 0 for its own.
+func (d *Document) size(url string, w, h float32) (float32, float32) {
+	if d.Size == nil || w <= 0 || h <= 0 {
+		return 0, 0
+	}
+	sw, sh := d.Size(url)
+	switch {
+	case sw <= 0 && sh <= 0:
+		return 0, 0
+	case sw <= 0:
+		sw = sh * w / h
+	case sh <= 0:
+		sh = sw * h / w
+	}
+	return sw, sh
 }
 
 // linked returns where the picture is among the inlines of a link, the one
