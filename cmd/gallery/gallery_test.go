@@ -469,6 +469,34 @@ func TestDocument(t *testing.T) {
 	}
 }
 
+// TestDocumentLinkedPictures checks that a picture a link is made of shows as
+// a picture, not as its description, and follows the link on a click; one
+// whose link goes to a heading of the page shows large instead.
+func TestDocumentLinkedPictures(t *testing.T) {
+	g, tt := newTester(t)
+	// The pictures load on goroutines of their own.
+	for range 200 {
+		tt.Frame()
+		if _, ok := tt.Find("打开链接：徽章"); ok {
+			break
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	if _, ok := tt.Find("打开链接：徽章"); !ok || tt.HasText("[徽章]") || tt.HasText("[标题图]") {
+		t.Fatalf("the pictures of links do not show: %q", tt.Texts())
+	}
+	click(t, tt, "打开链接：徽章")
+	tt.Frame()
+	if g.docLink != "https://example.com/badge" {
+		t.Errorf("a click on the picture of a link gave %q", g.docLink)
+	}
+	click(t, tt, "看大图：标题图")
+	tt.Advance(time.Second)
+	if _, ok := tt.Find("关闭大图"); !ok || g.docLink != "https://example.com/badge" {
+		t.Errorf("the picture of a link to a heading: shown large %v, link %q", ok, g.docLink)
+	}
+}
+
 // TestLightbox checks that a picture of a Document shows large on a click,
 // larger than it is in the text and within the window, and that a click
 // on it shuts it.

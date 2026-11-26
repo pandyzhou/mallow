@@ -1,6 +1,7 @@
 package mallow
 
 import (
+	"cmp"
 	"strings"
 	"sync"
 	"time"
@@ -53,20 +54,32 @@ type picture struct {
 	done bool
 }
 
-// pictures builds a paragraph of a Document that is pictures alone, in
-// place of what Markdown would: each as large as it is, at most as wide as
-// the view, its description showing until it loads, and, loaded, a button
-// that shows it large. It reports whether block i is such a paragraph.
+// pictures builds a paragraph of a Document that is pictures alone, each by
+// itself or the whole of a link, in place of what Markdown would: each as
+// large as it is, at most as wide as the view, its description showing until
+// it loads. Loaded, a picture by itself is a button that shows it large; one
+// that is a link follows it, as on GitHub, but shows large where the link
+// only goes to a heading of the page (#…). It reports whether block i is
+// such a paragraph.
 func (d *Document) pictures(c *ui.Context, doc *parser.Document, i int) bool {
 	if doc.Block(i).Kind != parser.Paragraph {
 		return false
 	}
 	in := doc.Inlines(i)
-	n := 0
+	// The pictures, where they are among the inlines, each with the link it
+	// is the whole of, -1 for none.
+	type shown struct{ at, link int }
+	var all []shown
 	for k := 0; k < len(in); k = in[k].Next {
 		switch in[k].Kind {
 		case parser.Image:
-			n++
+			all = append(all, shown{k, -1})
+		case parser.Link:
+			at := linked(in, k)
+			if at < 0 {
+				return false
+			}
+			all = append(all, shown{at, k})
 		case parser.SoftBreak, parser.LineBreak:
 		case parser.Text:
 			if strings.TrimSpace(in[k].Text) != "" {
@@ -76,28 +89,45 @@ func (d *Document) pictures(c *ui.Context, doc *parser.Document, i int) bool {
 			return false
 		}
 	}
-	if n == 0 {
+	if len(all) == 0 {
 		return false
 	}
 	const em = 14
 	ui.Row(c).Wrap().Gap(em * 0.5).AlignSelf(ui.Stretch).Children(func() {
-		for k := 0; k < len(in); k = in[k].Next {
-			if in[k].Kind != parser.Image {
-				continue
-			}
+		for _, p := range all {
+			k := p.at
 			alt := parser.PlainText(in[k+1 : in[k].Next])
 			src := d.picture(c, in[k].Dest)
+			title, link := in[k].Title, ""
+			if p.link >= 0 {
+				link = in[p.link].Dest
+				title = cmp.Or(title, in[p.link].Title)
+			}
+			// A link to a heading of the page has nowhere else to go.
+			follows := link != "" && !strings.HasPrefix(link, "#")
 			if src == nil {
 				label := alt
 				if label == "" {
 					label = "图片"
 				}
-				ph := ui.Row(c.Key(k)).Padding(em*0.5, em*0.75).Radius(em * 0.3).Background(Text.Alpha(0.07))
-				ph.Role(ui.RoleImage).Label(alt)
+				// Still a link while it shows as its description.
+				var ph ui.Element
+				if follows {
+					ph = ui.ButtonBase(c.Key(k)).Label("打开链接：" + label).Cursor(ui.CursorPointer)
+				} else {
+					ph = ui.Row(c.Key(k)).Role(ui.RoleImage).Label(alt)
+				}
+				ph.Padding(em*0.5, em*0.75).Radius(em * 0.3).Background(Text.Alpha(0.07))
 				ph.Children(func() { ui.Text(c, label).TextColor(Muted).FontSize(em * 0.875) })
+				if follows && ph.Clicked() {
+					d.follow(c, link)
+				}
 				continue
 			}
 			label := "看大图"
+			if follows {
+				label = "打开链接"
+			}
 			if alt != "" {
 				label += "：" + alt
 			}
@@ -108,15 +138,55 @@ func (d *Document) pictures(c *ui.Context, doc *parser.Document, i int) bool {
 					img.AspectRatio(w / h)
 				}
 			})
-			if in[k].Title != "" {
-				Tooltip(c, b, in[k].Title)
+			if title != "" {
+				Tooltip(c, b, title)
 			}
 			if b.Clicked() {
-				d.zoomed, d.zoom, d.zoomLabel, d.zoomIn = true, src, alt, d.showing
+				if follows {
+					d.follow(c, link)
+				} else {
+					d.zoomed, d.zoom, d.zoomLabel, d.zoomIn = true, src, alt, d.showing
+				}
 			}
 		}
 	})
 	return true
+}
+
+// linked returns where the picture is among the inlines of a link, the one
+// at k, that the picture is the whole of: -1 when the link holds anything
+// else, or more pictures.
+func linked(in []parser.Inline, k int) int {
+	at := -1
+	for j := k + 1; j < in[k].Next; j = in[j].Next {
+		switch in[j].Kind {
+		case parser.Image:
+			if at >= 0 {
+				return -1
+			}
+			at = j
+		case parser.SoftBreak, parser.LineBreak:
+		case parser.Text:
+			if strings.TrimSpace(in[j].Text) != "" {
+				return -1
+			}
+		default:
+			return -1
+		}
+	}
+	return at
+}
+
+// follow follows a link of the document as OnLink says, or, without it, as
+// Markdown does: in the browser, where it is to the web.
+func (d *Document) follow(c *ui.Context, url string) {
+	if d.OnLink != nil {
+		d.OnLink(url)
+		return
+	}
+	if ui.SafeToOpen(url) {
+		c.Services().OpenURL(url)
+	}
 }
 
 // picture returns the picture at an address once it is loaded, and begins

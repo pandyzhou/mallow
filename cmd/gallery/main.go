@@ -308,9 +308,11 @@ func (g *gallery) sections(c *ui.Context) {
 				// A Document follows its links as the app says.
 				g.doc.OnLink = func(url string) { g.docLink = url }
 				// Its pictures load as the app says, and show large on a
-				// click, in a Lightbox.
+				// click, in a Lightbox; one that is a link follows it, but
+				// shows large where the link goes to a heading of the page.
 				g.doc.LoadImage = func(string) (ui.ImageSource, error) { return galleryPicture(), nil }
-				g.doc.View(c, "来自别处的文档：[打开说明](docs/guide.md)\n\n![示意图](picture.png)")
+				g.doc.View(c, "来自别处的文档：[打开说明](docs/guide.md)\n\n"+
+					"![示意图](picture.png) [![徽章](badge.png)](https://example.com/badge) [![标题图](heading.png)](#top)")
 				if g.docLink != "" {
 					ui.Text(c, "点了链接："+g.docLink).FontSize(12).TextColor(mallow.Muted)
 				}
